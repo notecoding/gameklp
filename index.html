@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>업그레이드 로그라이크 (최적화 + 골드 강화)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  font-family:Arial,Helvetica,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;color:#fff;overflow:hidden}
+#gameContainer{background:rgba(0,0,0,.5);padding:20px;border-radius:20px;box-shadow:0 0 50px rgba(138,43,226,.5);backdrop-filter:blur(10px);width:980px;max-width:98vw}
+h1{text-align:center;font-size:36px;margin-bottom:15px;text-shadow:0 0 20px #ff006e;background:linear-gradient(90deg,#ff006e,#8338ec,#3a86ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+#ui{display:flex;justify-content:space-between;margin-bottom:15px;gap:15px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.1);padding:10px 20px;border-radius:10px;font-weight:bold;font-size:16px;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+#hpBar{width:200px;height:25px;background:rgba(0,0,0,.5);border-radius:12px;overflow:hidden;border:2px solid #ff006e;box-shadow:0 0 15px rgba(255,0,110,.5)}
+#hpFill{height:100%;background:linear-gradient(90deg,#ff006e,#ff5e78);width:100%;transition:width .3s;box-shadow:inset 0 0 10px rgba(255,255,255,.3)}
+#expBar{width:200px;height:15px;background:rgba(0,0,0,.5);border-radius:8px;overflow:hidden;border:2px solid #3a86ff;box-shadow:0 0 15px rgba(58,134,255,.5)}
+#expFill{height:100%;background:linear-gradient(90deg,#3a86ff,#06ffa5);width:0%;transition:width .3s}
+#game{width:800px;height:500px;background:linear-gradient(180deg,#1a1a2e,#16213e);position:relative;border:3px solid #8338ec;border-radius:15px;overflow:hidden;box-shadow:inset 0 0 50px rgba(0,0,0,.5),0 0 30px rgba(131,56,236,.3);margin:0 auto}
+#player{width:40px;height:40px;background:linear-gradient(135deg,#ff006e,#8338ec);position:absolute;border-radius:50%;box-shadow:0 0 30px rgba(255,0,110,.8);transition:all .05s;z-index:10;animation:playerPulse 1.5s ease-in-out infinite}
+@keyframes playerPulse{0%,100%{box-shadow:0 0 30px rgba(255,0,110,.8)}50%{box-shadow:0 0 50px rgba(255,0,110,1)}}
+.enemy{width:35px;height:35px;background:linear-gradient(135deg,#ff4d4d,#c92a2a);position:absolute;border-radius:50%;box-shadow:0 0 20px rgba(255,77,77,.7);animation:enemyFloat 2s ease-in-out infinite}
+@keyframes enemyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.boss{width:60px;height:60px;background:linear-gradient(135deg,#d946ef,#7e22ce);border:3px solid #fff;animation:bossRotate 3s linear infinite}
+@keyframes bossRotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.item{width:25px;height:25px;background:linear-gradient(135deg,#ffd700,#ffed4e);position:absolute;border-radius:50%;box-shadow:0 0 20px rgba(255,215,0,.9);animation:itemSpin 2s linear infinite}
+@keyframes itemSpin{from{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.2)}to{transform:rotate(360deg) scale(1)}}
+.projectile{width:15px;height:15px;background:radial-gradient(circle,#06ffa5,#3a86ff);position:absolute;border-radius:50%;box-shadow:0 0 15px #06ffa5}
+.damage{position:absolute;color:#ff006e;font-weight:bold;font-size:20px;pointer-events:none;animation:damageFloat 1s ease-out forwards;text-shadow:0 0 10px #000;z-index:100}
+@keyframes damageFloat{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-50px) scale(1.5);opacity:0}}
+.heal{color:#06ffa5}
+.particle{position:absolute;width:8px;height:8px;background:#ff006e;border-radius:50%;pointer-events:none;animation:particleExplode .8s ease-out forwards}
+@keyframes particleExplode{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
+#controls{text-align:center;margin-top:15px;font-size:14px;opacity:.8;background:rgba(255,255,255,.1);padding:10px;border-radius:10px}
+#gameOver,#menu,#settings,#leaderboard,#shop{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,0,0,.95);padding:30px;border-radius:20px;text-align:center;display:none;z-index:1000;border:3px solid #ff006e;box-shadow:0 0 50px rgba(255,0,110,.8);width:630px;max-width:90vw}
+#gameOver h2{font-size:40px;margin-bottom:10px;color:#ff006e;text-shadow:0 0 20px #ff006e}
+.modal-title{font-size:28px;margin-bottom:10px;color:#ffd700;text-shadow:0 0 12px #ffd700}
+.modal-btn{padding:12px 28px;font-size:16px;background:linear-gradient(135deg,#ff006e,#8338ec);color:#fff;border:none;border-radius:50px;cursor:pointer;font-weight:bold;margin:8px 6px;box-shadow:0 5px 20px rgba(255,0,110,.5);transition:all .25s}
+.modal-btn:hover{transform:scale(1.06)}
+.modal-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+#combo{position:absolute;top:20px;right:20px;font-size:32px;font-weight:bold;color:#ffd700;text-shadow:0 0 20px #ffd700}
+.enemyHpBar{position:absolute;top:-8px;left:0;width:100%;height:5px;background:rgba(0,0,0,.5);border-radius:3px}
+.enemyHpFill{height:100%;background:linear-gradient(90deg,#ff4d4d,#ff8787);border-radius:3px;transition:width .2s}
+#minimap{position:absolute;bottom:10px;right:10px;width:150px;height:100px;background:rgba(0,0,0,.7);border:2px solid #8338ec;border-radius:10px}
+.minimapDot{position:absolute;width:5px;height:5px;border-radius:50%}
+.playerDot{background:#ff006e;box-shadow:0 0 5px #ff006e}
+.enemyDot{background:#ff4d4d}
+#waveWarning{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;font-weight:bold;color:#ff006e;text-shadow:0 0 30px #ff006e;display:none;z-index:999}
+.badge{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 10px;border-radius:999px;margin:3px 4px;font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.input{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;outline:none}
+.select{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;outline:none}
+.range{width:220px}
+.small{font-size:12px;opacity:.8}
+hr{border:none;border-top:1px solid rgba(255,255,255,.15);margin:12px 0}
+#pauseOverlay{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(5px);
+  display:none;z-index:900;
+  justify-content:center;align-items:center;
+  font-size:48px;font-weight:bold;color:#ffd700;
+  text-shadow:0 0 30px #ffd700;
+}
+.stat.expected{background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3)}
+.shop-section-title{margin:8px 0;font-weight:bold}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.up-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px}
+.up-left{display:flex;gap:8px;align-items:center}
+.up-name{font-weight:bold}
+.up-level{font-size:12px;opacity:.8}
+.up-cost{font-size:12px;opacity:.9}
+</style>
+</head>
+<body>
+  <div id="gameContainer">
+    <h1>⚔️ 다크 로그라이크 ⚔️</h1>
+
+    <div id="ui">
+      <div>
+        <div class="stat">닉네임: <span id="nickLabel">Guest</span></div>
+        <div class="stat">LV: <span id="level">1</span></div>
+        <div id="hpBar"><div id="hpFill"></div></div>
+        <div style="font-size:12px;margin-top:5px">HP: <span id="hpText">100/100</span></div>
+      </div>
+      <div>
+        <div class="stat">스테이지: <span id="stage">1</span></div>
+        <div id="expBar"><div id="expFill"></div></div>
+        <div style="font-size:12px;margin-top:5px">EXP: <span id="expText">0/100</span></div>
+      </div>
+      <div>
+        <div class="stat">킬: <span id="kills">0</span></div>
+        <div class="stat">공격력: <span id="atk">20</span></div>
+        <div class="stat">점수: <span id="score">0</span></div>
+        <div class="stat">생존: <span id="survive">0s</span></div>
+        <div class="stat">골드: <span id="gold">0</span></div>
+        <div class="stat expected">획득예상: <span id="expectedGold">0G</span></div>
+      </div>
+    </div>
+
+    <div id="game">
+      <div id="player"></div>
+      <div id="minimap"></div>
+      <div id="waveWarning">⚠️ 새로운 웨이브! ⚠️</div>
+      <div id="pauseOverlay">⏸ 일시정지</div>
+
+      <!-- MENUS -->
+      <div id="menu">
+        <div class="modal-title">메인 메뉴</div>
+        <div class="row" style="justify-content:center;margin:10px 0">
+          <input id="nickInput" class="input" placeholder="닉네임" maxlength="12"/>
+          <select id="charSelect" class="select" title="캐릭터 선택">
+            <option value="basic">기본 전사 (무료)</option>
+            <option value="assassin">암살자 (해금: 200G)</option>
+            <option value="paladin">팔라딘 (해금: 500G)</option>
+          </select>
+        </div>
+        <div class="small">※ 캐릭터는 상점에서 해금 후 선택 가능</div>
+        <hr/>
+        <button class="modal-btn" id="btnStart">게임 시작</button>
+        <button class="modal-btn" id="btnShop">상점/강화</button>
+        <button class="modal-btn" id="btnLeaderboard">랭킹</button>
+        <button class="modal-btn" id="btnSettings">설정</button>
+      </div>
+
+      <div id="settings">
+        <div class="modal-title">설정</div>
+        <div style="margin:10px 0">
+          BGM 음량: <input type="range" id="bgmVol" class="range" min="0" max="1" step="0.01">
+        </div>
+        <div style="margin:10px 0">
+          SFX 음량: <input type="range" id="sfxVol" class="range" min="0" max="1" step="0.01">
+        </div>
+        <div class="small">ESC로 뒤로, P로 일시정지</div>
+        <hr/>
+        <button class="modal-btn" id="btnSettingsBack">뒤로</button>
+        <button class="modal-btn" id="btnResumeGame" style="display:none">게임 재개</button>
+      </div>
+
+      <div id="leaderboard">
+        <div class="modal-title">랭킹 (TOP 10)</div>
+        <div id="rankList" style="text-align:left;max-height:260px;overflow:auto"></div>
+        <hr/>
+        <button class="modal-btn" id="btnLbBack">뒤로</button>
+      </div>
+
+      <div id="shop">
+        <div class="modal-title">상점 (캐릭터 해금 & 골드 강화)</div>
+
+        <div class="shop-section-title">① 캐릭터 해금/선택</div>
+        <div id="shopList" class="shop-grid"></div>
+
+        <div class="shop-section-title">② 골드 강화 (영구 스탯)</div>
+        <div id="upgradeList"></div>
+        <div class="small" style="margin-top:6px">※ 강화는 영구 적용되며, 새 게임 시작 시 자동 반영됩니다.</div>
+
+        <hr/>
+        <button class="modal-btn" id="btnShopBack">뒤로</button>
+      </div>
+
+      <div id="gameOver">
+        <h2>💀 패배 💀</h2>
+        <p id="finalStats"></p>
+        <div id="earnedGold" style="margin:6px 0"></div>
+        <div id="achieveRow" class="row"></div>
+        <button id="restartBtn" class="modal-btn">다시 시작</button>
+        <button id="goMenuBtn" class="modal-btn">메뉴로</button>
+      </div>
+    </div>
+
+    <div id="controls">
+      ⬆️⬇️⬅️➡️ 이동 | SPACE 공격 | A 특수공격 | S 대시 | P 일시정지 | ESC 메뉴/뒤로
+    </div>
+  </div>
+
+<script>
+/* =========================
+   전역 상태 & 상수
+========================= */
+const game = document.getElementById('game');
+const playerEl = document.getElementById('player');
+const minimap = document.getElementById('minimap');
+const pauseOverlay = document.getElementById('pauseOverlay');
+const UI = {
+  hpText: document.getElementById('hpText'),
+  hpFill: document.getElementById('hpFill'),
+  level: document.getElementById('level'),
+  expText: document.getElementById('expText'),
+  expFill: document.getElementById('expFill'),
+  stage: document.getElementById('stage'),
+  atk: document.getElementById('atk'),
+  kills: document.getElementById('kills'),
+  score: document.getElementById('score'),
+  survive: document.getElementById('survive'),
+  gold: document.getElementById('gold'),
+  expectedGold: document.getElementById('expectedGold'),
+  nickLabel: document.getElementById('nickLabel')
+};
+const MODALS = {
+  menu: document.getElementById('menu'),
+  settings: document.getElementById('settings'),
+  leaderboard: document.getElementById('leaderboard'),
+  shop: document.getElementById('shop'),
+  gameOver: document.getElementById('gameOver'),
+  waveWarning: document.getElementById('waveWarning')
+};
+const BTN = {
+  start: document.getElementById('btnStart'),
+  shop: document.getElementById('btnShop'),
+  leaderboard: document.getElementById('btnLeaderboard'),
+  settings: document.getElementById('btnSettings'),
+  lbBack: document.getElementById('btnLbBack'),
+  shopBack: document.getElementById('btnShopBack'),
+  settingsBack: document.getElementById('btnSettingsBack'),
+  resumeGame: document.getElementById('btnResumeGame'),
+  restart: document.getElementById('restartBtn'),
+  goMenu: document.getElementById('goMenuBtn')
+};
+const INPUTS = {
+  nick: document.getElementById('nickInput'),
+  char: document.getElementById('charSelect'),
+  bgmVol: document.getElementById('bgmVol'),
+  sfxVol: document.getElementById('sfxVol')
+};
+const LISTS = {
+  rank: document.getElementById('rankList'),
+  shop: document.getElementById('shopList'),
+  upgrade: document.getElementById('upgradeList'),
+  achieveRow: document.getElementById('achieveRow'),
+  earnedGold: document.getElementById('earnedGold')
+};
+
+const LS_KEYS = {
+  save: 'dl_save_v2',          // 버전업: 업그레이드 포함
+  scores: 'dl_scores_v1',
+  settings: 'dl_settings_v1'
+};
+
+const CHARACTERS = {
+  basic:    { name:'기본 전사', cost:0,    colorStart:'#ff006e', colorEnd:'#8338ec', size:40, baseHp:100, baseAtk:20, speed:4,   projCount:8 },
+  assassin: { name:'암살자',   cost:200,  colorStart:'#06ffa5', colorEnd:'#3a86ff', size:34, baseHp:80,  baseAtk:25, speed:5.3, projCount:12 },
+  paladin:  { name:'팔라딘',   cost:500,  colorStart:'#ffd700', colorEnd:'#ff9f1c', size:44, baseHp:140, baseAtk:18, speed:3.6, projCount:6 }
+};
+
+// 영구 강화 정의
+const UPGRADE_DEFS = {
+  atk: { name:'공격력', perLevel:2,  costBase:100, costScale:1.5, max:50, icon:'🗡️' },
+  hp:  { name:'체력',   perLevel:10, costBase:100, costScale:1.45, max:50, icon:'❤️' },
+  spd: { name:'이속',   perLevel:0.1,costBase:120, costScale:1.6, max:40, icon:'⚡' }
+};
+
+// 업적
+const ACHIEVEMENTS = [
+  { id:'first_kill',   name:'첫 처치', cond: s => s.kills>=1 },
+  { id:'stage5',       name:'스테이지 5 돌파', cond: s => s.stage>=5 },
+  { id:'survive_60',   name:'생존 60초', cond: s => s.surviveSec>=60 },
+  { id:'boss_kill',    name:'보스 격파', cond: s => s.bossKills>=1 },
+  { id:'kill_100',     name:'100킬 달성', cond: s => s.kills>=100 }
+];
+
+let state = {
+  screen: 'menu',
+  running: false,
+  keys: {},
+  // 전투
+  playerX: 380, playerY: 230,
+  hp: 100, maxHp: 100, atk: 20, speed: 4,
+  level: 1, exp: 0, maxExp: 100,
+  stage: 1, kills: 0, bossKills: 0,
+  enemies: [], items: [], powerups: [], projectiles: [],
+  combo: 0, comboTimer: null, dashCooldown: 0, specialCooldown: 0,
+  // 점수/경제
+  score: 0, surviveSec: 0, timeAcc: 0, scorePerSecBase: 5, gold: 0,
+  // 메타
+  nick: 'Guest',
+  character: 'basic',
+  unlocks: { basic:true, assassin:false, paladin:false },
+  achievements: {},
+  upgrades: { atk:0, hp:0, spd:0 }, // 영구 업그레이드 레벨
+  // 오디오 (Web Audio)
+  audio: { bgmVol:0.5, sfxVol:0.7 }
+};
+
+/* =========================
+   오디오 (간단 WebAudio 비프)
+========================= */
+let audioCtx = null;
+function initAudio(){
+  try{
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }catch(e){ console.warn('Web Audio API not supported'); }
+  const st = loadSettings();
+  setBgmVolume(st.bgmVol ?? 0.5);
+  setSfxVolume(st.sfxVol ?? 0.7);
+}
+function setBgmVolume(v){ state.audio.bgmVol = v; }
+function setSfxVolume(v){ state.audio.sfxVol = v; }
+function playSfx(type){
+  if(!audioCtx || state.audio.sfxVol<=0) return;
+  try{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const freqs = { sfxHit: 440, sfxPick: 660, sfxBtn: 330, sfxBuy:520, sfxError:180 };
+    osc.frequency.value = freqs[type] || 440;
+    gain.gain.setValueAtTime(state.audio.sfxVol * 0.25, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+  }catch(e){}
+}
+
+/* =========================
+   저장/로드
+========================= */
+function loadSave(){
+  const s = JSON.parse(localStorage.getItem(LS_KEYS.save) || '{}');
+  if(s.nick) state.nick = s.nick;
+  if(s.gold!=null) state.gold = s.gold;
+  if(s.unlocks) state.unlocks = Object.assign(state.unlocks, s.unlocks);
+  if(s.achievements) state.achievements = Object.assign({}, s.achievements);
+  if(s.upgrades) state.upgrades = Object.assign(state.upgrades, s.upgrades);
+  if(s.character && state.unlocks[s.character]) state.character = s.character;
+  UI.nickLabel.textContent = state.nick;
+  UI.gold.textContent = state.gold;
+  // 설정
+  const st = loadSettings();
+  INPUTS.bgmVol.value = st.bgmVol ?? 0.5;
+  INPUTS.sfxVol.value = st.sfxVol ?? 0.7;
+  setBgmVolume(INPUTS.bgmVol.value);
+  setSfxVolume(INPUTS.sfxVol.value);
+}
+function saveMeta(){
+  localStorage.setItem(LS_KEYS.save, JSON.stringify({
+    nick: state.nick,
+    gold: state.gold,
+    unlocks: state.unlocks,
+    character: state.character,
+    achievements: state.achievements,
+    upgrades: state.upgrades
+  }));
+}
+function loadSettings(){
+  return JSON.parse(localStorage.getItem(LS_KEYS.settings) || '{}');
+}
+function saveSettings(){
+  localStorage.setItem(LS_KEYS.settings, JSON.stringify({
+    bgmVol: Number(INPUTS.bgmVol.value),
+    sfxVol: Number(INPUTS.sfxVol.value)
+  }));
+}
+function addScoreRecord(entry){
+  const list = JSON.parse(localStorage.getItem(LS_KEYS.scores) || '[]');
+  list.push(entry);
+  list.sort((a,b)=>b.score-a.score);
+  localStorage.setItem(LS_KEYS.scores, JSON.stringify(list.slice(0,10)));
+}
+function loadScores(){ return JSON.parse(localStorage.getItem(LS_KEYS.scores) || '[]'); }
+
+/* =========================
+   UI
+========================= */
+function updateUI(){
+  updateUIField(UI.hpText, `${Math.floor(state.hp)}/${state.maxHp}`);
+  UI.hpFill.style.width = (state.hp/state.maxHp*100)+'%';
+  updateUIField(UI.level, state.level);
+  updateUIField(UI.expText, `${state.exp}/${state.maxExp}`);
+  UI.expFill.style.width = (state.exp/state.maxExp*100)+'%';
+  updateUIField(UI.stage, state.stage);
+  updateUIField(UI.atk, state.atk);
+  updateUIField(UI.kills, state.kills);
+  updateUIField(UI.score, Math.floor(state.score));
+  updateUIField(UI.survive, `${state.surviveSec}s`);
+  updateUIField(UI.gold, state.gold);
+  updateUIField(UI.expectedGold, scoreToGold(state.score) + 'G');
+  if(state.hp<=0) gameOver();
+}
+function updateUIField(el, val){
+  if(el && el.textContent !== String(val)) el.textContent = String(val);
+}
+function showWaveWarning(){
+  MODALS.waveWarning.style.display='block';
+  setTimeout(()=>MODALS.waveWarning.style.display='none',1200);
+}
+function showCombo(){
+  const old = document.getElementById('combo'); if(old) old.remove();
+  if(state.combo>1){
+    const el=document.createElement('div'); el.id='combo'; el.textContent=`${state.combo} COMBO!`;
+    game.appendChild(el);
+    setTimeout(()=>el.remove(),500);
+  }
+}
+function createParticles(x,y,color='#ff006e'){
+  if(document.querySelectorAll('.particle').length>60) return;
+  for(let i=0;i<10;i++){
+    const p=document.createElement('div'); p.className='particle';
+    p.style.left=x+'px'; p.style.top=y+'px'; p.style.background=color;
+    const ang=(Math.PI*2*i)/10, dist=30+Math.random()*20;
+    p.style.setProperty('--x', Math.cos(ang)*dist+'px');
+    p.style.setProperty('--y', Math.sin(ang)*dist+'px');
+    game.appendChild(p); setTimeout(()=>p.remove(),800);
+  }
+}
+function showDamage(x,y,text,isHeal=false){
+  if(document.querySelectorAll('.damage').length>35) return;
+  const d=document.createElement('div');
+  d.className='damage'+(isHeal?' heal':'');
+  d.textContent=(isHeal?'+':'-')+text;
+  d.style.left=x+'px'; d.style.top=y+'px';
+  game.appendChild(d); setTimeout(()=>d.remove(),1000);
+}
+
+/* =========================
+   미니맵 (innerHTML 1회)
+========================= */
+function updateMinimap(){
+  const dots=['<div class="minimapDot playerDot" style="left:'+(state.playerX/800*150)+'px;top:'+(state.playerY/500*100)+'px"></div>'];
+  for(const e of state.enemies){
+    dots.push('<div class="minimapDot enemyDot" style="left:'+(e.x/800*150)+'px;top:'+(e.y/500*100)+'px"></div>');
+  }
+  minimap.innerHTML=dots.join('');
+}
+
+/* =========================
+   적/아이템/탄
+========================= */
+function createEnemy(isBoss=false){
+  const el=document.createElement('div');
+  el.className = isBoss?'enemy boss':'enemy';
+  const x = Math.random()*(isBoss?740:760);
+  const y = Math.random()*(isBoss?440:460);
+  el.style.left=x+'px'; el.style.top=y+'px';
+
+  const bar=document.createElement('div'); bar.className='enemyHpBar';
+  const fill=document.createElement('div'); fill.className='enemyHpFill';
+  bar.appendChild(fill); el.appendChild(bar);
+  game.appendChild(el);
+
+  const data = {
+    element: el, hpFill: fill, x, y,
+    hp: isBoss? 200 : 30+(state.stage*10),
+    maxHp: isBoss? 200 : 30+(state.stage*10),
+    speed: isBoss? 0.6 : 1,
+    isBoss, lastDamageTime: 0
+  };
+  state.enemies.push(data);
+}
+function createItem(x,y,type='heal'){
+  const el=document.createElement('div');
+  el.className = (type==='powerup') ? 'powerup' : 'item';
+  el.style.left=x+'px'; el.style.top=y+'px';
+  game.appendChild(el);
+  if(type==='powerup') state.powerups.push({element:el, x,y});
+  else state.items.push({element:el, x,y, type});
+}
+function createProjectile(x,y,dx,dy){
+  const el=document.createElement('div'); el.className='projectile';
+  el.style.left=x+'px'; el.style.top=y+'px'; game.appendChild(el);
+  state.projectiles.push({element:el,x,y,dx,dy,damage:state.atk});
+}
+
+/* =========================
+   전투/행동
+========================= */
+function attack(){
+  if(state.specialCooldown>0) return;
+  const n = nearestEnemy(); if(!n || n.dist>=400) return;
+  const dx=(n.enemy.x-state.playerX)/n.dist*10;
+  const dy=(n.enemy.y-state.playerY)/n.dist*10;
+  createProjectile(state.playerX+15,state.playerY+15,dx,dy);
+  playSfx('sfxHit');
+}
+function specialAttack(){
+  if(state.specialCooldown>0) return;
+  state.specialCooldown = 30;
+  const ch=getChar(); const count = ch.projCount || 8;
+  for(let i=0;i<count;i++){
+    const ang=(Math.PI*2*i)/count;
+    createProjectile(state.playerX+15,state.playerY+15,Math.cos(ang)*8,Math.sin(ang)*8);
+  }
+  playSfx('sfxHit');
+}
+function dash(){
+  if(state.dashCooldown>0) return;
+  state.dashCooldown=20;
+  let dx=0,dy=0;
+  if(state.keys['ArrowLeft']) dx-=1;
+  if(state.keys['ArrowRight']) dx+=1;
+  if(state.keys['ArrowUp']) dy-=1;
+  if(state.keys['ArrowDown']) dy+=1;
+  if(dx||dy){
+    const d=Math.hypot(dx,dy);
+    state.playerX += (dx/d)*100;
+    state.playerY += (dy/d)*100;
+    clampPlayer();
+  }
+}
+function nearestEnemy(){
+  return state.enemies.reduce((n,e)=>{
+    const d=Math.hypot(state.playerX-e.x, state.playerY-e.y);
+    if(!n || d<n.dist) return {enemy:e, dist:d};
+    return n;
+  }, null);
+}
+function clampPlayer(){
+  state.playerX=Math.max(0,Math.min(760,state.playerX));
+  state.playerY=Math.max(0,Math.min(460,state.playerY));
+  playerEl.style.left=state.playerX+'px';
+  playerEl.style.top=state.playerY+'px';
+}
+
+/* =========================
+   경험치/레벨
+========================= */
+function gainExp(a){
+  state.exp += a;
+  if(state.exp>=state.maxExp){
+    state.exp=0; state.level++;
+    state.maxExp = Math.floor(state.maxExp*1.5);
+    state.maxHp += 20; state.hp = state.maxHp;
+    state.atk += 5;
+    showDamage(state.playerX, state.playerY-30, 'LEVEL UP!', true);
+  }
+  updateUI();
+}
+
+/* =========================
+   스테이지/웨이브 (async)
+========================= */
+async function nextStage(){
+  if(state.enemies.length===0 && state.running){
+    state.stage++; updateUI(); showWaveWarning();
+    const cnt=2+state.stage;
+    for(let i=0;i<cnt;i++){ createEnemy(false); await delay(150); }
+    if(state.stage%5===0){ await delay(300); createEnemy(true); }
+    if(Math.random()<0.4) createItem(Math.random()*770,Math.random()*470,'powerup');
+  }
+}
+const delay = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+/* =========================
+   충돌/판정 루프
+========================= */
+function stepProjectiles(){
+  for(let i=state.projectiles.length-1;i>=0;i--){
+    const p=state.projectiles[i];
+    p.x+=p.dx; p.y+=p.dy;
+    p.element.style.left=p.x+'px'; p.element.style.top=p.y+'px';
+    if(p.x<0||p.x>800||p.y<0||p.y>500){
+      p.element.remove(); state.projectiles.splice(i,1); continue;
+    }
+    for(let j=state.enemies.length-1;j>=0;j--){
+      const e=state.enemies[j];
+      const d=Math.hypot(p.x - (e.x+17), p.y - (e.y+17));
+      if(d<30){
+        e.hp -= p.damage;
+        e.hpFill.style.width = (e.hp/e.maxHp*100)+'%';
+        showDamage(e.x+17,e.y,p.damage);
+        p.element.remove(); state.projectiles.splice(i,1);
+        if(e.hp<=0){
+          state.combo++; resetComboTimer(); showCombo();
+          if(e.isBoss) state.bossKills++;
+          createParticles(e.x+17,e.y+17,'#ff4d4d');
+          e.element.remove(); state.enemies.splice(j,1);
+          state.kills++; state.score += (e.isBoss?100:10)*Math.max(1,state.combo);
+          gainExp(e.isBoss?50:10);
+          if(Math.random()<0.3) createItem(e.x,e.y,'heal');
+          checkAchievements();
+        }
+        break;
+      }
+    }
+  }
+}
+function stepEnemies(){
+  const now=Date.now();
+  // 적이 많아지면 CSS 애니메이션 부하 방지
+  const heavy = state.enemies.length>=40;
+  for(const e of state.enemies){
+    if(heavy) e.element.style.animation='none';
+    const dx=state.playerX - e.x, dy=state.playerY - e.y;
+    const d=Math.hypot(dx,dy)||1;
+    e.x += (dx/d)*e.speed; e.y += (dy/d)*e.speed;
+    e.element.style.left=e.x+'px'; e.element.style.top=e.y+'px';
+    if(d<40 && now - e.lastDamageTime > 500){
+      const dmg = e.isBoss?10:5;
+      state.hp -= dmg; e.lastDamageTime = now;
+      showDamage(state.playerX, state.playerY, dmg);
+      updateUI();
+    }
+  }
+}
+function stepPickups(){
+  for(let i=state.items.length-1;i>=0;i--){
+    const it=state.items[i];
+    const d=Math.hypot(state.playerX-it.x, state.playerY-it.y);
+    if(d<40){
+      state.hp=Math.min(state.maxHp, state.hp+30);
+      showDamage(state.playerX,state.playerY,30,true);
+      createParticles(it.x,it.y,'#ffd700');
+      it.element.remove(); state.items.splice(i,1);
+      updateUI(); playSfx('sfxPick');
+    }
+  }
+  for(let i=state.powerups.length-1;i>=0;i--){
+    const it=state.powerups[i];
+    const d=Math.hypot(state.playerX-it.x, state.playerY-it.y);
+    if(d<40){
+      state.atk += 10;
+      showDamage(state.playerX,state.playerY,'ATK +10!',true);
+      createParticles(it.x,it.y,'#06ffa5');
+      it.element.remove(); state.powerups.splice(i,1);
+      updateUI(); playSfx('sfxPick');
+    }
+  }
+}
+function resetComboTimer(){
+  clearTimeout(state.comboTimer);
+  state.comboTimer = setTimeout(()=>{
+    state.combo=0; const c=document.getElementById('combo'); if(c) c.remove();
+  },2000);
+}
+
+/* =========================
+   생존 타이머 기반 점수
+========================= */
+function stepTimerAndScore(dt){
+  state.timeAcc += dt;
+  const prev = state.surviveSec;
+  while(state.timeAcc >= 1){
+    state.timeAcc -= 1;
+    state.surviveSec += 1;
+    state.score += state.scorePerSecBase * Math.pow(1.05, state.stage); // 네가 올린 버전 유지
+  }
+  if(state.surviveSec !== prev) updateUI();
+}
+
+/* =========================
+   게임 루프 & 입력
+========================= */
+let lastTs = performance.now();
+function gameLoop(ts){
+  if(state.screen!=='playing' || !state.running){ lastTs = ts; requestAnimationFrame(gameLoop); return; }
+  const dt = Math.min(0.05,(ts-lastTs)/1000); lastTs = ts;
+
+  // 이동
+  let mx=0,my=0;
+  const sp = state.speed;
+  if(state.keys['ArrowLeft']) mx -= sp;
+  if(state.keys['ArrowRight']) mx += sp;
+  if(state.keys['ArrowUp']) my -= sp;
+  if(state.keys['ArrowDown']) my += sp;
+  if(mx||my){
+    const d=Math.hypot(mx,my); state.playerX += mx/d*sp; state.playerY += my/d*sp; clampPlayer();
+  }
+
+  stepProjectiles();
+  stepEnemies();
+  stepPickups();
+
+  if(state.dashCooldown>0) state.dashCooldown--;
+  if(state.specialCooldown>0) state.specialCooldown--;
+
+  updateMinimap();
+  nextStage();
+  stepTimerAndScore(dt);
+
+  requestAnimationFrame(gameLoop);
+}
+document.addEventListener('keydown', e=>{
+  state.keys[e.key]=true;
+  if(state.screen==='playing'){
+    if(e.key===' '){ attack(); e.preventDefault(); }
+    else if(e.key==='a'||e.key==='A'){ specialAttack(); e.preventDefault(); }
+    else if(e.key==='s'||e.key==='S'){ dash(); e.preventDefault(); }
+    else if(e.key==='p'||e.key==='P'){ pauseGame(); e.preventDefault(); }
+    else if(e.key==='Escape'){ pauseGame(); e.preventDefault(); }
+  }else{
+    if(e.key==='Escape'){ goBackFromModal(); }
+  }
+});
+document.addEventListener('keyup', e=>{ state.keys[e.key]=false; });
+
+/* =========================
+   화면 전환
+========================= */
+function openMenu(){
+  state.screen='menu'; state.running=false;
+  pauseOverlay.style.display='none';
+  showModal('menu');
+  updateCharacterSelect();
+}
+function startGame(){
+  applyCharacter();
+  state.screen='playing'; state.running=true;
+  resetRunState();
+  hideAllModals();
+  pauseOverlay.style.display='none';
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+function pauseGame(){
+  if(state.screen!=='playing') return;
+  state.screen='paused'; state.running=false;
+  pauseOverlay.style.display='flex';
+  showModal('settings');
+  BTN.resumeGame.style.display='inline-block';
+}
+function resumeGame(){
+  if(state.screen!=='paused') return;
+  state.screen='playing'; state.running=true;
+  hideAllModals();
+  pauseOverlay.style.display='none';
+  BTN.resumeGame.style.display='none';
+}
+function goBackFromModal(){
+  if(state.screen==='settings' || state.screen==='leaderboard' || state.screen==='shop'){
+    openMenu(); return;
+  }
+  if(state.screen==='paused'){ resumeGame(); return; }
+}
+function showModal(name){
+  hideAllModals();
+  MODALS[name].style.display='block';
+  if(name==='leaderboard') renderLeaderboard();
+  if(name==='shop'){ renderShop(); renderUpgrades(); }
+}
+function hideAllModals(){
+  Object.values(MODALS).forEach(m=>{ if(m) m.style.display='none'; });
+}
+
+/* =========================
+   한 판 초기화
+========================= */
+function resetRunState(){
+  state.playerX=380; state.playerY=230; clampPlayer();
+  const ch=getChar();
+  // 영구 업그레이드 적용
+  const atkPlus = state.upgrades.atk * UPGRADE_DEFS.atk.perLevel;
+  const hpPlus  = state.upgrades.hp  * UPGRADE_DEFS.hp.perLevel;
+  const spdPlus = state.upgrades.spd * UPGRADE_DEFS.spd.perLevel;
+
+  state.maxHp=Math.round(ch.baseHp + hpPlus);
+  state.hp=state.maxHp;
+  state.atk=Math.round(ch.baseAtk + atkPlus);
+  state.speed=(ch.speed + spdPlus);
+
+  state.level=1; state.exp=0; state.maxExp=100;
+  state.stage=1; state.kills=0; state.bossKills=0;
+  state.score=0; state.surviveSec=0; state.timeAcc=0;
+  state.combo=0; clearTimeout(state.comboTimer); const c=document.getElementById('combo'); if(c) c.remove();
+  for(const arr of [state.enemies,state.items,state.powerups,state.projectiles]) {
+    arr.forEach(o=>o.element?.remove()); arr.length=0;
+  }
+  for(let i=0;i<3;i++) createEnemy(false);
+  lastTs = performance.now();
+}
+
+/* =========================
+   캐릭터/상점/랭킹/강화
+========================= */
+function getChar(){ return CHARACTERS[state.character]; }
+function applyCharacter(){
+  const ch=getChar();
+  playerEl.style.width=ch.size+'px';
+  playerEl.style.height=ch.size+'px';
+  playerEl.style.background = `linear-gradient(135deg, ${ch.colorStart}, ${ch.colorEnd})`;
+}
+function updateCharacterSelect(){
+  Array.from(INPUTS.char.options).forEach(opt=>{
+    const id = opt.value;
+    if(!state.unlocks[id]){
+      opt.disabled = true;
+      opt.textContent = CHARACTERS[id].name + ' (잠김 - ' + CHARACTERS[id].cost + 'G)';
+    }else{
+      opt.disabled = false;
+      opt.textContent = CHARACTERS[id].name + (CHARACTERS[id].cost > 0 ? ' (해금됨)' : ' (무료)');
+    }
+  });
+}
+function renderShop(){
+  LISTS.shop.innerHTML='';
+  Object.entries(CHARACTERS).forEach(([id,cfg])=>{
+    const unlocked = !!state.unlocks[id];
+    const card=document.createElement('div');
+    card.style.padding='10px';
+    card.style.background='rgba(255,255,255,.08)';
+    card.style.border='1px solid rgba(255,255,255,.15)';
+    card.style.borderRadius='12px';
+    card.innerHTML = `
+      <div class="badge">${cfg.name}</div>
+      <div class="badge">HP ${cfg.baseHp}</div>
+      <div class="badge">ATK ${cfg.baseAtk}</div>
+      <div class="badge">SPD ${cfg.speed}</div>
+      <div class="badge">특수공격 ${cfg.projCount}발</div>
+      <div class="badge">${unlocked? '✅ 해금 완료' : `🔒 ${cfg.cost}G`}</div>
+      <div style="margin-top:6px">
+        <button class="modal-btn" data-id="${id}" ${!unlocked && state.gold<cfg.cost?'disabled':''}>${unlocked?'선택':'해금'}</button>
+      </div>
+    `;
+    LISTS.shop.appendChild(card);
+    const btn = card.querySelector('button');
+    btn.onclick = ()=>{
+      const idBtn = btn.dataset.id;
+      if(state.unlocks[idBtn]){
+        state.character=idBtn; saveMeta(); INPUTS.char.value=idBtn; applyCharacter(); 
+        updateCharacterSelect(); playSfx('sfxBtn');
+      }else{
+        if(state.gold>=CHARACTERS[idBtn].cost){
+          state.gold -= CHARACTERS[idBtn].cost;
+          state.unlocks[idBtn]=true; saveMeta(); updateUI(); renderShop(); updateCharacterSelect(); playSfx('sfxBuy');
+        }else{
+          playSfx('sfxError'); alert('골드가 부족합니다!');
+        }
+      }
+    };
+  });
+}
+function calcUpgradeCost(key, level){
+  const def = UPGRADE_DEFS[key];
+  return Math.floor(def.costBase * Math.pow(def.costScale, level));
+}
+function renderUpgrades(){
+  LISTS.upgrade.innerHTML='';
+  Object.keys(UPGRADE_DEFS).forEach(key=>{
+    const def=UPGRADE_DEFS[key]; const lv = state.upgrades[key]||0;
+    const cost = calcUpgradeCost(key, lv);
+    const maxed = lv>=def.max;
+    const row = document.createElement('div');
+    row.className='up-row';
+    row.innerHTML = `
+      <div class="up-left">
+        <span>${def.icon}</span>
+        <div>
+          <div class="up-name">${def.name}</div>
+          <div class="up-level">Lv ${lv}/${def.max}</div>
+          <div class="up-cost">${maxed? '최대 강화' : `비용: ${cost}G`}</div>
+        </div>
+      </div>
+      <div>
+        <button class="modal-btn" data-up="${key}" ${maxed?'disabled':''}>강화</button>
+      </div>
+    `;
+    LISTS.upgrade.appendChild(row);
+    const btn=row.querySelector('button');
+    btn.onclick = ()=>{
+      if(maxed){ playSfx('sfxError'); return; }
+      if(state.gold<cost){ playSfx('sfxError'); alert('골드가 부족합니다!'); return; }
+      state.gold -= cost;
+      state.upgrades[key] = lv+1;
+      saveMeta(); updateUI(); renderUpgrades(); playSfx('sfxBuy');
+    };
+  });
+}
+function renderLeaderboard(){
+  const scores = loadScores();
+  LISTS.rank.innerHTML = scores.length? '' : '<div class="small">기록이 없습니다.</div>';
+  scores.forEach((e,i)=>{
+    const div=document.createElement('div');
+    div.style.padding='6px 0';
+    div.innerHTML = `<b>${i+1}위</b> · ${e.nick} · <b>${e.score}</b>점 · 스테이지 ${e.stage} · LV ${e.level} · ${e.survive}s`;
+    LISTS.rank.appendChild(div);
+  });
+}
+
+/* =========================
+   게임 오버/정산
+========================= */
+function scoreToGold(score){ return Math.floor(score*0.10); }
+function gameOver(){
+  if(state.screen==='gameover') return;
+  state.screen='gameover'; state.running=false;
+
+  checkAchievements();
+
+  const goldEarn = scoreToGold(state.score);
+  state.gold += goldEarn; saveMeta();
+
+  document.getElementById('finalStats').innerHTML =
+    `닉네임: ${state.nick}<br>최종 레벨: ${state.level}<br>스테이지: ${state.stage}<br>처치: ${state.kills} (보스 ${state.bossKills})<br>점수: ${Math.floor(state.score)}<br>생존: ${state.surviveSec}s`;
+  LISTS.earnedGold.textContent = `획득 골드: +${goldEarn}G (총 ${state.gold}G)`;
+
+  addScoreRecord({
+    nick: state.nick,
+    score: Math.floor(state.score),
+    stage: state.stage,
+    level: state.level,
+    survive: state.surviveSec,
+    ts: Date.now()
+  });
+
+  renderEarnedAchievements();
+  MODALS.gameOver.style.display='block';
+}
+
+/* =========================
+   업적
+========================= */
+function checkAchievements(){
+  const snap = { kills:state.kills, stage:state.stage, surviveSec:state.surviveSec, bossKills:state.bossKills };
+  let got=false;
+  ACHIEVEMENTS.forEach(a=>{
+    if(!state.achievements[a.id] && a.cond(snap)){
+      state.achievements[a.id]=true;
+      const b=document.createElement('div'); b.className='badge'; b.textContent='🏆 '+a.name;
+      b.style.position='absolute'; b.style.top='10px'; b.style.left='10px'; b.style.background='rgba(0,0,0,.8)';
+      b.style.border='2px solid #ffd700'; b.style.zIndex='1500'; b.style.fontSize='16px';
+      game.appendChild(b); setTimeout(()=>b.remove(),2000);
+      got=true;
+    }
+  });
+  if(got){ playSfx('sfxPick'); saveMeta(); }
+}
+function renderEarnedAchievements(){
+  LISTS.achieveRow.innerHTML='';
+  if(Object.keys(state.achievements).length === 0){
+    LISTS.achieveRow.innerHTML = '<div class="small">달성한 업적이 없습니다</div>';
+    return;
+  }
+  Object.entries(state.achievements).forEach(([id,ok])=>{
+    if(ok){
+      const a=ACHIEVEMENTS.find(x=>x.id===id);
+      const tag=document.createElement('div'); tag.className='badge'; 
+      tag.textContent='🏆 '+(a? a.name:id);
+      tag.style.background='rgba(255,215,0,.2)';
+      tag.style.border='1px solid #ffd700';
+      LISTS.achieveRow.appendChild(tag);
+    }
+  });
+}
+
+/* =========================
+   버튼/이벤트
+========================= */
+BTN.start.onclick = ()=>{
+  state.nick = (INPUTS.nick.value||'Guest').trim().slice(0,12) || 'Guest';
+  UI.nickLabel.textContent = state.nick;
+  const wantChar = INPUTS.char.value;
+  if(state.unlocks[wantChar]) state.character = wantChar;
+  saveMeta(); playSfx('sfxBtn'); startGame();
+};
+BTN.settings.onclick = ()=>{ playSfx('sfxBtn'); showModal('settings'); state.screen='settings'; };
+BTN.leaderboard.onclick = ()=>{ playSfx('sfxBtn'); showModal('leaderboard'); state.screen='leaderboard'; };
+BTN.shop.onclick = ()=>{ playSfx('sfxBtn'); showModal('shop'); state.screen='shop'; };
+BTN.lbBack.onclick = ()=>{ playSfx('sfxBtn'); openMenu(); };
+BTN.shopBack.onclick = ()=>{ playSfx('sfxBtn'); openMenu(); };
+BTN.settingsBack.onclick = ()=>{ playSfx('sfxBtn'); openMenu(); };
+BTN.resumeGame.onclick = ()=>{ playSfx('sfxBtn'); resumeGame(); };
+BTN.restart.onclick = ()=>{ playSfx('sfxBtn'); startGame(); };
+BTN.goMenu.onclick = ()=>{ playSfx('sfxBtn'); openMenu(); };
+
+INPUTS.bgmVol.oninput = ()=>{ setBgmVolume(Number(INPUTS.bgmVol.value)); saveSettings(); };
+INPUTS.sfxVol.oninput = ()=>{ setSfxVolume(Number(INPUTS.sfxVol.value)); saveSettings(); };
+
+/* =========================
+   부트스트랩
+========================= */
+function init(){
+  initAudio();
+  loadSave();
+  INPUTS.nick.value = state.nick;
+  INPUTS.char.value = state.character;
+  updateCharacterSelect();
+  applyCharacter();
+  openMenu();
+}
+init();
+</script>
+</body>
+</html>
