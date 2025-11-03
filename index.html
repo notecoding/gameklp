@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>업그레이드 로그라이크 (최적화 + 골드 강화)</title>
 <style>
+  
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
@@ -72,6 +73,14 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.15);margin:12px 0}
 .up-name{font-weight:bold}
 .up-level{font-size:12px;opacity:.8}
 .up-cost{font-size:12px;opacity:.9}
+#player.flash {
+  animation: playerFlash 0.2s ease-in-out 3;
+}
+
+@keyframes playerFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
 </style>
 </head>
 <body>
@@ -584,8 +593,14 @@ function stepEnemies(){
     e.x += (dx/d)*e.speed; e.y += (dy/d)*e.speed;
     e.element.style.left=e.x+'px'; e.element.style.top=e.y+'px';
     if(d<40 && now - e.lastDamageTime > 500){
-      const dmg = e.isBoss?10:5;
-      state.hp -= dmg; e.lastDamageTime = now;
+      const dmg = e.isBoss ? 10 : 5;
+      state.hp -= dmg; 
+      e.lastDamageTime = now;
+
+      // 피격 시 깜빡임 효과
+      playerEl.classList.add('flash');
+      setTimeout(()=>playerEl.classList.remove('flash'), 600); // 0.2s * 3회 = 0.6s
+
       showDamage(state.playerX, state.playerY, dmg);
       updateUI();
     }
