@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>다크 로그라이크 - 완전판</title>
+  <title>다크 로그라이크 - 무기&스킬 시스템</title>
   <style>
     * {
       margin: 0;
@@ -29,7 +29,7 @@
       border-radius: 20px;
       box-shadow: 0 0 50px rgba(138, 43, 226, .5);
       backdrop-filter: blur(10px);
-      width: 980px;
+      width: 1300px;
       max-width: 98vw
     }
 
@@ -96,6 +96,13 @@
       transition: width .3s
     }
 
+    #gameArea {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
     #game {
       width: 800px;
       height: 500px;
@@ -105,7 +112,6 @@
       border-radius: 15px;
       overflow: hidden;
       box-shadow: inset 0 0 50px rgba(0, 0, 0, .5), 0 0 30px rgba(131, 56, 236, .3);
-      margin: 0 auto
     }
 
     #player {
@@ -232,6 +238,31 @@
       }
     }
 
+    .weapon-drop {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      border-radius: 8px;
+      animation: weaponFloat 2s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes weaponFloat {
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-15px) rotate(180deg);
+      }
+    }
+
     .projectile {
       width: 15px;
       height: 15px;
@@ -307,7 +338,8 @@
     #shop,
     #intro,
     #tutorial,
-    #customize {
+    #customize,
+    #skillDialog {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -326,6 +358,170 @@
       overflow-y: auto
     }
 
+    #skillDialog {
+      width: 700px;
+      border-color: #ffd700;
+      box-shadow: 0 0 50px rgba(255, 215, 0, .8);
+    }
+
+    .skill-choice {
+      background: rgba(255, 255, 255, .08);
+      border: 2px solid rgba(255, 215, 0, .3);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 15px 0;
+      cursor: pointer;
+      transition: all .3s;
+    }
+
+    .skill-choice:hover {
+      background: rgba(255, 215, 0, .15);
+      border-color: rgba(255, 215, 0, .6);
+      transform: scale(1.05);
+    }
+
+    .skill-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 8px;
+    }
+
+    .skill-level {
+      font-size: 14px;
+      color: #06ffa5;
+      margin-bottom: 8px;
+    }
+
+    .skill-desc {
+      font-size: 14px;
+      opacity: 0.9;
+      line-height: 1.4;
+    }
+
+    .skill-fusion {
+      background: linear-gradient(135deg, #d946ef, #7e22ce);
+      border-color: #d946ef;
+    }
+
+    .skill-fusion:hover {
+      background: linear-gradient(135deg, #e946ff, #8e32de);
+      border-color: #e946ff;
+    }
+
+    #weaponUI {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #8338ec;
+      border-radius: 10px;
+      padding: 10px;
+      min-width: 200px;
+      max-width: 250px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .weapon-slot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin: 5px 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .weapon-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .weapon-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .weapon-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    .weapon-stack {
+      font-size: 12px;
+      color: #06ffa5;
+    }
+
+    #skillsUI {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #8338ec;
+      border-radius: 10px;
+      padding: 10px;
+      min-width: 200px;
+      max-width: 250px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    #weaponUI::-webkit-scrollbar,
+    #skillsUI::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #weaponUI::-webkit-scrollbar-track,
+    #skillsUI::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, .1);
+      border-radius: 10px;
+    }
+
+    #weaponUI::-webkit-scrollbar-thumb,
+    #skillsUI::-webkit-scrollbar-thumb {
+      background: rgba(131, 56, 236, .6);
+      border-radius: 10px;
+    }
+
+    #weaponUI::-webkit-scrollbar-thumb:hover,
+    #skillsUI::-webkit-scrollbar-thumb:hover {
+      background: rgba(131, 56, 236, .8);
+    }
+
+    .skill-bar-name {
+      font-size: 11px;
+      flex: 1;
+      text-align: left;
+    }
+
+    .skill-bar-level {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      margin: 4px 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .skill-bar-name {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-align: center;
+      color: #ffd700;
+    }
+
+    .skill-bar {
+      font-size: 11px;
+      color: #06ffa5;
+      font-weight: bold;
+    }
+
     #gameOver::-webkit-scrollbar,
     #menu::-webkit-scrollbar,
     #settings::-webkit-scrollbar,
@@ -333,7 +529,8 @@
     #shop::-webkit-scrollbar,
     #intro::-webkit-scrollbar,
     #tutorial::-webkit-scrollbar,
-    #customize::-webkit-scrollbar {
+    #customize::-webkit-scrollbar,
+    #skillDialog::-webkit-scrollbar {
       width: 8px
     }
 
@@ -344,7 +541,8 @@
     #shop::-webkit-scrollbar-track,
     #intro::-webkit-scrollbar-track,
     #tutorial::-webkit-scrollbar-track,
-    #customize::-webkit-scrollbar-track {
+    #customize::-webkit-scrollbar-track,
+    #skillDialog::-webkit-scrollbar-track {
       background: rgba(255, 255, 255, .1);
       border-radius: 10px
     }
@@ -356,7 +554,8 @@
     #shop::-webkit-scrollbar-thumb,
     #intro::-webkit-scrollbar-thumb,
     #tutorial::-webkit-scrollbar-thumb,
-    #customize::-webkit-scrollbar-thumb {
+    #customize::-webkit-scrollbar-thumb,
+    #skillDialog::-webkit-scrollbar-thumb {
       background: rgba(255, 0, 110, .6);
       border-radius: 10px
     }
@@ -368,7 +567,8 @@
     #shop::-webkit-scrollbar-thumb:hover,
     #intro::-webkit-scrollbar-thumb:hover,
     #tutorial::-webkit-scrollbar-thumb:hover,
-    #customize::-webkit-scrollbar-thumb:hover {
+    #customize::-webkit-scrollbar-thumb:hover,
+    #skillDialog::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 0, 110, .8)
     }
 
@@ -732,6 +932,31 @@
       color: #ffd700;
       margin-bottom: 8px
     }
+
+    .shield-visual {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(6, 255, 165, 0.6);
+      border-radius: 50%;
+      top: -5px;
+      left: -5px;
+      animation: shieldPulse 1s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shieldPulse {
+      0%,
+      100% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
   </style>
 </head>
 
@@ -765,20 +990,31 @@
       </div>
     </div>
 
-    <div id="game">
-      <div id="player"></div>
-      <div id="minimap"></div>
-      <div id="waveWarning">⚠️ 새로운 웨이브! ⚠️</div>
-      <div id="pauseOverlay">⏸ 일시정지</div>
+    <div id="gameArea">
+      <div id="skillsUI"></div>
+      
+      <div id="game">
+        <div id="player"></div>
+        <div id="minimap"></div>
+        <div id="waveWarning">⚠️ 새로운 웨이브! ⚠️</div>
+        <div id="pauseOverlay">⸨ 일시정지</div>
+      </div>
+      
+      <div id="weaponUI"></div>
+    </div>
 
-      <div id="intro">
+    <div id="controls">
+      ⬆️⬇️⬅️➡️ 이동 | SPACE 공격 | A 특수공격 | S 대시 | P 일시정지 | ESC 메뉴/뒤로
+    </div>
+
+    <div id="intro">
         <div class="intro-logo">⚔️ 다크 로그라이크 ⚔️</div>
         <p style="font-size:18px;margin:20px 0;line-height:1.6">
           어둠의 던전에 오신 것을 환영합니다.<br>
           강력한 적들과 싸우며 생존하세요.<br>
           죽음은 끝이 아닌 새로운 시작입니다.
         </p>
-        <div class="small" style="margin:20px 0">ver 2.5 - Complete Merged Edition</div>
+        <div class="small" style="margin:20px 0">ver 3.0 - 무기&스킬 시스템</div>
         <button class="modal-btn" id="btnIntroStart">시작하기</button>
         <button class="modal-btn" id="btnIntroTutorial">튜토리얼</button>
       </div>
@@ -793,24 +1029,25 @@
             • S: 대시 (쿨다운 있음)</p>
         </div>
         <div class="tutorial-step">
-          <h3>⚔️ 전투 시스템</h3>
+          <h3>⚔️ 무기 시스템</h3>
+          <p>• 맵에 떨어진 무기를 획득하세요<br>
+            • 무기는 중복 획득 시 효과가 중첩됩니다<br>
+            • 왼쪽 하단에서 보유 무기 확인 가능<br>
+            • 무기마다 고유한 효과가 있습니다</p>
+        </div>
+        <div class="tutorial-step">
+          <h3>✨ 스킬 시스템</h3>
+          <p>• 레벨업 시 3가지 스킬 중 선택<br>
+            • 스킬은 최대 10레벨까지 강화 가능<br>
+            • 특정 스킬 2개가 10레벨 이상이면 융합 스킬 등장<br>
+            • 왼쪽 상단에서 보유 스킬 확인 가능</p>
+        </div>
+        <div class="tutorial-step">
+          <h3>🎯 전투 시스템</h3>
           <p>• 적을 연속으로 처치하면 콤보 발동!<br>
             • 콤보가 높을수록 더 많은 점수 획득<br>
             • 5스테이지마다 강력한 보스 등장<br>
             • 엘리트 몬스터는 높은 보상 제공</p>
-        </div>
-        <div class="tutorial-step">
-          <h3>🎯 맵 요소</h3>
-          <p>• 🟫 벽: 이동 불가, 탄환 차단<br>
-            • 🔴 함정: 접촉 시 피해<br>
-            • 💛 아이템: 체력 회복<br>
-            • ⚡ 파워업: 공격력 증가</p>
-        </div>
-        <div class="tutorial-step">
-          <h3>💰 성장 시스템</h3>
-          <p>• 게임 종료 시 점수의 10%를 골드로 획득<br>
-            • 상점에서 캐릭터 해금 및 영구 강화<br>
-            • 커스터마이징으로 외형 변경 가능</p>
         </div>
         <button class="modal-btn" id="btnTutorialBack">뒤로</button>
       </div>
@@ -891,6 +1128,11 @@
         <button class="modal-btn" id="btnShopBack">뒤로</button>
       </div>
 
+      <div id="skillDialog">
+        <div class="modal-title">🌟 레벨업! 스킬 선택 🌟</div>
+        <div id="skillChoices"></div>
+      </div>
+
       <div id="gameOver">
         <h2>💀 패배 💀</h2>
         <p id="finalStats"></p>
@@ -901,9 +1143,7 @@
       </div>
     </div>
 
-    <div id="controls">
-      ⬆️⬇️⬅️➡️ 이동 | SPACE 공격 | A 특수공격 | S 대시 | P 일시정지 | ESC 메뉴/뒤로
-    </div>
+    
   </div>
 
   <script>
@@ -911,6 +1151,9 @@
     const playerEl = document.getElementById('player');
     const minimap = document.getElementById('minimap');
     const pauseOverlay = document.getElementById('pauseOverlay');
+    const weaponUIEl = document.getElementById('weaponUI');
+    const skillsUIEl = document.getElementById('skillsUI');
+    
     const UI = {
       hpText: document.getElementById('hpText'),
       hpFill: document.getElementById('hpFill'),
@@ -926,6 +1169,7 @@
       expectedGold: document.getElementById('expectedGold'),
       nickLabel: document.getElementById('nickLabel')
     };
+    
     const MODALS = {
       intro: document.getElementById('intro'),
       tutorial: document.getElementById('tutorial'),
@@ -935,8 +1179,10 @@
       shop: document.getElementById('shop'),
       customize: document.getElementById('customize'),
       gameOver: document.getElementById('gameOver'),
-      waveWarning: document.getElementById('waveWarning')
+      waveWarning: document.getElementById('waveWarning'),
+      skillDialog: document.getElementById('skillDialog')
     };
+    
     const BTN = {
       introStart: document.getElementById('btnIntroStart'),
       introTutorial: document.getElementById('btnIntroTutorial'),
@@ -954,12 +1200,14 @@
       restart: document.getElementById('restartBtn'),
       goMenu: document.getElementById('goMenuBtn')
     };
+    
     const INPUTS = {
       nick: document.getElementById('nickInput'),
       char: document.getElementById('charSelect'),
       bgmVol: document.getElementById('bgmVol'),
       sfxVol: document.getElementById('sfxVol')
     };
+    
     const LISTS = {
       rank: document.getElementById('rankList'),
       shop: document.getElementById('shopList'),
@@ -968,13 +1216,173 @@
       earnedGold: document.getElementById('earnedGold'),
       colorGrid: document.getElementById('colorGrid'),
       weaponGrid: document.getElementById('weaponGrid'),
-      effectGrid: document.getElementById('effectGrid')
+      effectGrid: document.getElementById('effectGrid'),
+      skillChoices: document.getElementById('skillChoices')
     };
 
     const LS_KEYS = {
       save: 'dl_save_v3',
       scores: 'dl_scores_v1',
       settings: 'dl_settings_v1'
+    };
+
+    // 무기 정의
+    const WEAPONS = {
+      sword: {
+        id: 'sword',
+        name: '검',
+        icon: '⚔️',
+        color: '#c0c0c0',
+        effect: 'atk',
+        value: 5,
+        desc: '공격력 +5'
+      },
+      bow: {
+        id: 'bow',
+        name: '활',
+        icon: '🏹',
+        color: '#8b4513',
+        effect: 'speed',
+        value: 0.3,
+        desc: '이동속도 +0.3'
+      },
+      staff: {
+        id: 'staff',
+        name: '지팡이',
+        icon: '🪄',
+        color: '#9370db',
+        effect: 'projSpeed',
+        value: 2,
+        desc: '투사체 속도 +2'
+      },
+      axe: {
+        id: 'axe',
+        name: '도끼',
+        icon: '🪓',
+        color: '#8b0000',
+        effect: 'atk',
+        value: 8,
+        desc: '공격력 +8'
+      },
+      dagger: {
+        id: 'dagger',
+        name: '단검',
+        icon: '🗡️',
+        color: '#696969',
+        effect: 'atkSpeed',
+        value: 0.1,
+        desc: '공격속도 +10%'
+      }
+    };
+
+    // 스킬 정의
+    const SKILLS = {
+      powerBoost: {
+        id: 'powerBoost',
+        name: '공격력 강화',
+        icon: '⚡',
+        maxLevel: 20,
+        getValue: (lv) => lv * 3,
+        desc: (lv) => `공격력 +${lv * 3}`
+      },
+      lifeSteal: {
+        id: 'lifeSteal',
+        name: '흡혈',
+        icon: '🩸',
+        maxLevel: 20,
+        getValue: (lv) => lv * 2,
+        desc: (lv) => `적 처치 시 HP ${lv * 2} 회복`
+      },
+      speedBoost: {
+        id: 'speedBoost',
+        name: '이동속도 강화',
+        icon: '💨',
+        maxLevel: 20,
+        getValue: (lv) => lv * 0.2,
+        desc: (lv) => `이동속도 +${(lv * 0.2).toFixed(1)}`
+      },
+      shield: {
+        id: 'shield',
+        name: '방어막',
+        icon: '🛡️',
+        maxLevel: 20,
+        getValue: (lv) => lv * 10,
+        desc: (lv) => `최대 체력 +${lv * 10}`
+      },
+      criticalHit: {
+        id: 'criticalHit',
+        name: '치명타',
+        icon: '💥',
+        maxLevel: 20,
+        getValue: (lv) => lv * 5,
+        desc: (lv) => `${lv * 5}% 확률로 2배 데미지`
+      },
+      multiShot: {
+        id: 'multiShot',
+        name: '다중 발사',
+        icon: '🎯',
+        maxLevel: 20,
+        getValue: (lv) => Math.floor(lv / 3),
+        desc: (lv) => `투사체 +${Math.floor(lv / 3)}개`
+      },
+      penetration: {
+        id: 'penetration',
+        name: '관통',
+        icon: '🔱',
+        maxLevel: 20,
+        getValue: (lv) => lv,
+        desc: (lv) => `투사체가 적 ${lv}명 관통`
+      },
+      rage: {
+        id: 'rage',
+        name: '분노',
+        icon: '😡',
+        maxLevel: 20,
+        getValue: (lv) => lv * 0.5,
+        desc: (lv) => `체력 50% 이하시 공격력 +${lv * 0.5}%`
+      },
+      harmony: {
+        id: 'harmony',
+        name: '조화',
+        icon: '☯️',
+        maxLevel: 20,
+        getValue: (lv) => lv * 2,
+        desc: (lv) => `초당 HP ${(lv * 2).toFixed(1)} 재생`
+      }
+    };
+
+    // 융합 스킬 정의
+    const FUSION_SKILLS = {
+      berserker: {
+        id: 'berserker',
+        name: '광전사',
+        icon: '⚔️🩸',
+        requires: ['powerBoost', 'lifeSteal'],
+        requiredLevel: 10,
+        maxLevel: 10,
+        getValue: (lv) => lv * 10,
+        desc: (lv) => `공격력 +${lv * 10}, 적 처치 시 HP ${lv * 5} 회복, 공격속도 +20%`
+      },
+      fortress: {
+        id: 'fortress',
+        name: '요새',
+        icon: '🛡️💨',
+        requires: ['shield', 'speedBoost'],
+        requiredLevel: 10,
+        maxLevel: 10,
+        getValue: (lv) => lv * 20,
+        desc: (lv) => `최대 HP +${lv * 20}, 이동속도 +${(lv * 0.3).toFixed(1)}, 피격 시 3초간 무적`
+      },
+      destroyer: {
+        id: 'destroyer',
+        name: '파괴자',
+        icon: '💥🔱',
+        requires: ['criticalHit', 'penetration'],
+        requiredLevel: 10,
+        maxLevel: 10,
+        getValue: (lv) => lv * 10,
+        desc: (lv) => `${lv * 10}% 확률로 3배 치명타, 모든 투사체가 적 5명 관통`
+      }
     };
 
     const CHARACTERS = {
@@ -1027,7 +1435,7 @@
       hp: 100, maxHp: 100, atk: 20, speed: 4,
       level: 1, exp: 0, maxExp: 100,
       stage: 1, kills: 0, bossKills: 0, eliteKills: 0,
-      enemies: [], items: [], powerups: [], projectiles: [], walls: [], traps: [],
+      enemies: [], items: [], powerups: [], projectiles: [], walls: [], traps: [], weaponDrops: [],
       combo: 0, comboTimer: null, dashCooldown: 0, specialCooldown: 0,
       score: 0, surviveSec: 0, timeAcc: 0, scorePerSecBase: 5, gold: 0,
       nick: 'Guest',
@@ -1036,26 +1444,26 @@
       achievements: {},
       upgrades: { atk: 0, hp: 0, spd: 0 },
       customization: { color: 'red', weapon: 'normal', effect: 'normal' },
-      audio: { bgmVol: 0.5, sfxVol: 0.7 }
+      audio: { bgmVol: 0.5, sfxVol: 0.7 },
+      weapons: {},
+      skills: {},
+      pendingSkillChoice: false,
+      shieldActive: false,
+      invincible: false,
+      invincibleTimer: 0,
+      regenTimer: 0
     };
 
     let audioCtx = null;
     let bgmAudio = null;
 
+    // =========================
+    // 오디오 시스템
+    // =========================
     function initAudio() {
       try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       } catch (e) { console.warn('Web Audio API not supported'); }
-
-      // BGM 오디오 파일 로드
-      bgmAudio = new Audio();
-      bgmAudio.src = './bgm.wav';
-      bgmAudio.loop = true;
-      bgmAudio.volume = 0.5;
-
-      const st = loadSettings();
-      setBgmVolume(st.bgmVol ?? 0.5);
-      setSfxVolume(st.sfxVol ?? 0.7);
     }
 
     function setBgmVolume(v) {
@@ -1064,21 +1472,6 @@
     }
 
     function setSfxVolume(v) { state.audio.sfxVol = v; }
-
-    function playBGM() {
-      if (!bgmAudio) return;
-      try {
-        bgmAudio.currentTime = 0;
-        bgmAudio.play().catch(e => console.warn('BGM play failed:', e));
-      } catch (e) { console.warn('BGM failed:', e); }
-    }
-
-    function stopBGM() {
-      if (bgmAudio) {
-        bgmAudio.pause();
-        bgmAudio.currentTime = 0;
-      }
-    }
 
     function playSfx(type) {
       if (!audioCtx || state.audio.sfxVol <= 0) return;
@@ -1120,7 +1513,7 @@
             osc.stop(now + 0.2);
             break;
 
-          case 'sfxWin':
+          case 'sfxLevelUp':
             osc.type = 'sine';
             osc.frequency.setValueAtTime(523, now);
             osc.frequency.setValueAtTime(659, now + 0.1);
@@ -1179,6 +1572,9 @@
       } catch (e) { console.warn('SFX failed:', e); }
     }
 
+    // =========================
+    // 저장/로드 시스템
+    // =========================
     function loadSave() {
       const s = JSON.parse(localStorage.getItem(LS_KEYS.save) || '{}');
       if (s.nick) state.nick = s.nick;
@@ -1229,6 +1625,9 @@
 
     function loadScores() { return JSON.parse(localStorage.getItem(LS_KEYS.scores) || '[]'); }
 
+    // =========================
+    // UI 업데이트
+    // =========================
     function updateUI() {
       updateUIField(UI.hpText, `${Math.floor(state.hp)}/${state.maxHp}`);
       UI.hpFill.style.width = (state.hp / state.maxHp * 100) + '%';
@@ -1236,7 +1635,7 @@
       updateUIField(UI.expText, `${state.exp}/${state.maxExp}`);
       UI.expFill.style.width = (state.exp / state.maxExp * 100) + '%';
       updateUIField(UI.stage, state.stage);
-      updateUIField(UI.atk, state.atk);
+      updateUIField(UI.atk, Math.floor(calculateTotalAtk()));
       updateUIField(UI.kills, state.kills);
       updateUIField(UI.score, Math.floor(state.score));
       updateUIField(UI.survive, `${state.surviveSec}s`);
@@ -1249,6 +1648,300 @@
       if (el && el.textContent !== String(val)) el.textContent = String(val);
     }
 
+    function updateWeaponUI() {
+      const weaponEntries = Object.entries(state.weapons);
+      if (weaponEntries.length === 0) {
+        weaponUIEl.innerHTML = '<div style="font-size:12px;font-weight:bold;margin-bottom:8px;text-align:center;color:#ffd700">보유 무기</div><div style="font-size:11px;opacity:0.7;text-align:center">무기 없음</div>';
+        return;
+      }
+
+      let html = '<div style="font-size:12px;font-weight:bold;margin-bottom:8px;text-align:center;color:#ffd700">보유 무기</div>';
+      weaponEntries.forEach(([id, count]) => {
+        const weapon = WEAPONS[id];
+        if (weapon) {
+          html += `
+            <div class="weapon-slot">
+              <div class="weapon-icon" style="background:${weapon.color}">${weapon.icon}</div>
+              <div class="weapon-info">
+                <div class="weapon-name">${weapon.name}</div>
+                <div class="weapon-stack">x${count} - ${weapon.desc}</div>
+              </div>
+            </div>
+          `;
+        }
+      });
+      weaponUIEl.innerHTML = html;
+    }
+
+    function updateSkillsUI() {
+      const skillEntries = Object.entries(state.skills);
+      if (skillEntries.length === 0) {
+        skillsUIEl.innerHTML = '<div style="font-size:12px;font-weight:bold;margin-bottom:8px;text-align:center;color:#ffd700">보유 스킬</div><div style="font-size:11px;opacity:0.7;text-align:center;padding:10px">스킬 없음</div>';
+        return;
+      }
+
+      let html = '<div style="font-size:12px;font-weight:bold;margin-bottom:8px;text-align:center;color:#ffd700">보유 스킬</div>';
+      skillEntries.forEach(([id, level]) => {
+        const skill = SKILLS[id] || FUSION_SKILLS[id];
+        if (skill) {
+          html += `
+            <div class="skill-bar">
+              <span>${skill.icon}</span>
+              <div class="skill-bar-name">${skill.name}</div>
+              <div class="skill-bar-level">Lv${level}</div>
+            </div>
+          `;
+        }
+      });
+      skillsUIEl.innerHTML = html;
+    }
+
+    // =========================
+    // 무기 시스템
+    // =========================
+    function createWeaponDrop(x, y) {
+      const weaponKeys = Object.keys(WEAPONS);
+      const randomWeapon = WEAPONS[weaponKeys[Math.floor(Math.random() * weaponKeys.length)]];
+      
+      const el = document.createElement('div');
+      el.className = 'weapon-drop';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.background = randomWeapon.color;
+      el.textContent = randomWeapon.icon;
+      game.appendChild(el);
+      
+      state.weaponDrops.push({ element: el, x, y, weaponId: randomWeapon.id });
+    }
+
+    function pickupWeapon(weaponId) {
+      if (!state.weapons[weaponId]) {
+        state.weapons[weaponId] = 0;
+      }
+      state.weapons[weaponId]++;
+      applyWeaponEffects();
+      updateWeaponUI();
+      playSfx('sfxPick');
+    }
+
+    function applyWeaponEffects() {
+      // 무기 효과 재계산
+      let bonusAtk = 0;
+      let bonusSpeed = 0;
+      
+      Object.entries(state.weapons).forEach(([id, count]) => {
+        const weapon = WEAPONS[id];
+        if (weapon) {
+          if (weapon.effect === 'atk') {
+            bonusAtk += weapon.value * count;
+          } else if (weapon.effect === 'speed') {
+            bonusSpeed += weapon.value * count;
+          }
+        }
+      });
+      
+      // 기본 스탯에 무기 보너스는 별도로 적용됨 (calculateTotalAtk, calculateTotalSpeed에서 처리)
+    }
+
+    function calculateTotalAtk() {
+      let total = state.atk;
+      
+      // 무기 보너스
+      Object.entries(state.weapons).forEach(([id, count]) => {
+        const weapon = WEAPONS[id];
+        if (weapon && weapon.effect === 'atk') {
+          total += weapon.value * count;
+        }
+      });
+      
+      // 스킬 보너스
+      if (state.skills.powerBoost) {
+        total += SKILLS.powerBoost.getValue(state.skills.powerBoost);
+      }
+      if (state.skills.berserker) {
+        total += FUSION_SKILLS.berserker.getValue(state.skills.berserker);
+      }
+      
+      // 분노 스킬
+      if (state.skills.rage && state.hp < state.maxHp * 0.5) {
+        total *= (1 + SKILLS.rage.getValue(state.skills.rage) / 100);
+      }
+      
+      return total;
+    }
+
+    function calculateTotalSpeed() {
+      let total = state.speed;
+      
+      // 무기 보너스
+      Object.entries(state.weapons).forEach(([id, count]) => {
+        const weapon = WEAPONS[id];
+        if (weapon && weapon.effect === 'speed') {
+          total += weapon.value * count;
+        }
+      });
+      
+      // 스킬 보너스
+      if (state.skills.speedBoost) {
+        total += SKILLS.speedBoost.getValue(state.skills.speedBoost);
+      }
+      if (state.skills.fortress) {
+        total += FUSION_SKILLS.fortress.getValue(state.skills.fortress) * 0.015;
+      }
+      
+      return total;
+    }
+
+    // =========================
+    // 스킬 시스템
+    // =========================
+    function showSkillDialog() {
+      if (state.pendingSkillChoice) return;
+      
+      state.pendingSkillChoice = true;
+      state.running = false;
+      
+      const availableSkills = getAvailableSkills();
+      const choices = selectRandomSkills(availableSkills, 3);
+      
+      LISTS.skillChoices.innerHTML = '';
+      
+      choices.forEach(skillId => {
+        const isFusion = FUSION_SKILLS[skillId];
+        const skill = isFusion ? FUSION_SKILLS[skillId] : SKILLS[skillId];
+        const currentLevel = state.skills[skillId] || 0;
+        
+        const div = document.createElement('div');
+        div.className = 'skill-choice' + (isFusion ? ' skill-fusion' : '');
+        div.innerHTML = `
+          <div class="skill-name">${skill.icon} ${skill.name}</div>
+          <div class="skill-level">현재 레벨: ${currentLevel} → ${currentLevel + 1}</div>
+          <div class="skill-desc">${skill.desc(currentLevel + 1)}</div>
+          ${isFusion ? '<div style="margin-top:8px;font-size:12px;color:#d946ef">⭐ 융합 스킬 ⭐</div>' : ''}
+        `;
+        
+        div.onclick = () => {
+          selectSkill(skillId);
+        };
+        
+        LISTS.skillChoices.appendChild(div);
+      });
+      
+      MODALS.skillDialog.style.display = 'block';
+    }
+
+    function getAvailableSkills() {
+      const available = [];
+      
+      // 일반 스킬
+      Object.keys(SKILLS).forEach(id => {
+        const currentLevel = state.skills[id] || 0;
+        if (currentLevel < SKILLS[id].maxLevel) {
+          available.push(id);
+        }
+      });
+      
+      // 융합 스킬 체크
+      Object.keys(FUSION_SKILLS).forEach(id => {
+        const fusion = FUSION_SKILLS[id];
+        const currentLevel = state.skills[id] || 0;
+        
+        if (currentLevel < fusion.maxLevel) {
+          const hasRequirements = fusion.requires.every(reqId => {
+            return (state.skills[reqId] || 0) >= fusion.requiredLevel;
+          });
+          
+          if (hasRequirements) {
+            available.push(id);
+          }
+        }
+      });
+      
+      return available;
+    }
+
+    function selectRandomSkills(available, count) {
+      const shuffled = [...available].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, Math.min(count, shuffled.length));
+    }
+
+    function selectSkill(skillId) {
+      if (!state.skills[skillId]) {
+        state.skills[skillId] = 0;
+      }
+      state.skills[skillId]++;
+      
+      applySkillEffects(skillId);
+      updateSkillsUI();
+      
+      MODALS.skillDialog.style.display = 'none';
+      state.pendingSkillChoice = false;
+      state.running = true;
+      
+      playSfx('sfxLevelUp');
+    }
+
+    function applySkillEffects(skillId) {
+      const skill = SKILLS[skillId] || FUSION_SKILLS[skillId];
+      if (!skill) return;
+      
+      // 방어막 스킬 - 최대 체력 증가
+      if (skillId === 'shield') {
+        const hpBonus = skill.getValue(state.skills[skillId]);
+        state.maxHp = getChar().baseHp + state.upgrades.hp * UPGRADE_DEFS.hp.perLevel + hpBonus;
+        if (state.skills.fortress) {
+          state.maxHp += FUSION_SKILLS.fortress.getValue(state.skills.fortress);
+        }
+        state.hp = Math.min(state.hp + hpBonus, state.maxHp);
+        updateShieldVisual();
+      }
+      
+      // 요새 융합 스킬
+      if (skillId === 'fortress') {
+        const hpBonus = FUSION_SKILLS.fortress.getValue(state.skills.fortress);
+        state.maxHp += hpBonus;
+        state.hp = Math.min(state.hp + hpBonus, state.maxHp);
+        updateShieldVisual();
+      }
+      
+      updateUI();
+    }
+
+    function updateShieldVisual() {
+      const hasShield = state.skills.shield || state.skills.fortress;
+      const existing = playerEl.querySelector('.shield-visual');
+      
+      if (hasShield && !existing) {
+        const shield = document.createElement('div');
+        shield.className = 'shield-visual';
+        playerEl.appendChild(shield);
+      } else if (!hasShield && existing) {
+        existing.remove();
+      }
+    }
+
+    // =========================
+    // 경험치 및 레벨업
+    // =========================
+    function gainExp(amount) {
+      state.exp += amount;
+      if (state.exp >= state.maxExp) {
+        state.exp -= state.maxExp;
+        state.level++;
+        state.maxExp = Math.floor(state.maxExp * 1.5);
+        
+        showDamage(state.playerX, state.playerY - 30, 'LEVEL UP!', true);
+        playSfx('sfxLevelUp');
+        
+        // 스킬 선택 다이얼로그 표시
+        showSkillDialog();
+      }
+      updateUI();
+    }
+
+    // =========================
+    // 파티클 및 시각 효과
+    // =========================
     function showWaveWarning() {
       MODALS.waveWarning.style.display = 'block';
       setTimeout(() => MODALS.waveWarning.style.display = 'none', 1200);
@@ -1293,6 +1986,9 @@
       minimap.innerHTML = dots.join('');
     }
 
+    // =========================
+    // 맵 요소 생성
+    // =========================
     function createWall(x, y, w, h) {
       const el = document.createElement('div');
       el.className = 'wall';
@@ -1317,7 +2013,7 @@
 
     function generateMapElements() {
       const wallCount = 2 + Math.floor(state.stage / 2);
-      const playerSafeZone = 150; // 플레이어 주변 안전 지대 반경
+      const playerSafeZone = 150;
 
       for (let i = 0; i < wallCount; i++) {
         let x, y, w, h;
@@ -1331,13 +2027,11 @@
           h = 40 + Math.random() * 60;
           attempts++;
 
-          // 플레이어와의 거리 체크
           const distToPlayer = Math.hypot(
             (x + w / 2) - (state.playerX + 20),
             (y + h / 2) - (state.playerY + 20)
           );
 
-          // 다른 벽과의 충돌 체크
           let overlapsWall = false;
           for (const wall of state.walls) {
             if (x < wall.x + wall.w + 20 && x + w + 20 > wall.x &&
@@ -1368,13 +2062,9 @@
             y = 50 + Math.random() * 420;
             attempts++;
 
-            // 플레이어와의 거리 체크
             const distToPlayer = Math.hypot(x - state.playerX, y - state.playerY);
-
-            // 벽 위에 생성되는지 체크
             const onWall = checkWallCollision(x, y, 30);
 
-            // 다른 함정과 너무 가까운지 체크
             let tooClose = false;
             for (const trap of state.traps) {
               if (Math.hypot(x - trap.x, y - trap.y) < 80) {
@@ -1391,6 +2081,13 @@
             createTrap(x, y);
           }
         }
+      }
+      
+      // 무기 드롭 생성
+      if (Math.random() < 0.5) {
+        let x = 100 + Math.random() * 600;
+        let y = 100 + Math.random() * 300;
+        createWeaponDrop(x, y);
       }
     }
 
@@ -1429,17 +2126,22 @@
       for (const t of state.traps) {
         const d = Math.hypot(state.playerX - t.x, state.playerY - t.y);
         if (d < 35 && now - t.lastDamage > 1000) {
-          state.hp -= 10;
-          t.lastDamage = now;
-          showDamage(state.playerX, state.playerY, 10);
-          playSfx('sfxDamage');
-          playerEl.classList.add('flash');
-          setTimeout(() => playerEl.classList.remove('flash'), 600);
-          updateUI();
+          if (!state.invincible) {
+            state.hp -= 10;
+            t.lastDamage = now;
+            showDamage(state.playerX, state.playerY, 10);
+            playSfx('sfxDamage');
+            playerEl.classList.add('flash');
+            setTimeout(() => playerEl.classList.remove('flash'), 600);
+            updateUI();
+          }
         }
       }
     }
 
+    // =========================
+    // 적 생성 및 관리
+    // =========================
     function createEnemy(type = 'normal') {
       const el = document.createElement('div');
       const isBoss = type === 'boss';
@@ -1457,7 +2159,6 @@
         y = Math.random() * (500 - size);
         attempts++;
 
-        // 플레이어와 너무 가까우면 안됨 (최소 100px)
         const distToPlayer = Math.hypot(x - state.playerX, y - state.playerY);
 
         if (distToPlayer >= 100 && !checkWallCollision(x, y, size)) {
@@ -1465,7 +2166,6 @@
         }
       } while (attempts < maxAttempts);
 
-      // 최대 시도 후에도 실패하면 맵 가장자리에 배치
       if (attempts >= maxAttempts) {
         x = Math.random() < 0.5 ? 10 : 800 - size - 10;
         y = Math.random() * (500 - size);
@@ -1516,9 +2216,21 @@
       el.style.background = `radial-gradient(circle, ${weaponColor}, #3a86ff)`;
       el.style.left = x + 'px'; el.style.top = y + 'px';
       game.appendChild(el);
-      state.projectiles.push({ element: el, x, y, dx, dy, damage: state.atk });
+      
+      const penetration = state.skills.penetration ? SKILLS.penetration.getValue(state.skills.penetration) : 0;
+      const destroyerBonus = state.skills.destroyer ? 5 : 0;
+      
+      state.projectiles.push({ 
+        element: el, x, y, dx, dy, 
+        damage: calculateTotalAtk(),
+        penetration: penetration + destroyerBonus,
+        hitCount: 0
+      });
     }
 
+    // =========================
+    // 전투 시스템
+    // =========================
     function attack() {
       if (state.specialCooldown > 0) return;
       const n = nearestEnemy(); if (!n || n.dist >= 400) return;
@@ -1531,7 +2243,14 @@
     function specialAttack() {
       if (state.specialCooldown > 0) return;
       state.specialCooldown = 30;
-      const ch = getChar(); const count = ch.projCount || 8;
+      const ch = getChar(); 
+      let count = ch.projCount || 8;
+      
+      // 다중 발사 스킬
+      if (state.skills.multiShot) {
+        count += SKILLS.multiShot.getValue(state.skills.multiShot);
+      }
+      
       for (let i = 0; i < count; i++) {
         const ang = (Math.PI * 2 * i) / count;
         createProjectile(state.playerX + 15, state.playerY + 15, Math.cos(ang) * 8, Math.sin(ang) * 8);
@@ -1553,14 +2272,11 @@
         let newX = state.playerX + (dx / d) * 100;
         let newY = state.playerY + (dy / d) * 100;
 
-        // 대시 경로상 벽 체크
         if (checkWallCollision(newX, newY, ch.size)) {
-          // 절반만 대시
           newX = state.playerX + (dx / d) * 50;
           newY = state.playerY + (dy / d) * 50;
 
           if (checkWallCollision(newX, newY, ch.size)) {
-            // 대시 실패, 원위치
             return;
           }
         }
@@ -1587,18 +2303,6 @@
       playerEl.style.top = state.playerY + 'px';
     }
 
-    function gainExp(a) {
-      state.exp += a;
-      if (state.exp >= state.maxExp) {
-        state.exp = 0; state.level++;
-        state.maxExp = Math.floor(state.maxExp * 1.5);
-        state.maxHp += 20; state.hp = state.maxHp;
-        state.atk += 5;
-        showDamage(state.playerX, state.playerY - 30, 'LEVEL UP!', true);
-      }
-      updateUI();
-    }
-
     async function nextStage() {
       if (state.enemies.length === 0 && state.running) {
         for (const arr of [state.walls, state.traps]) {
@@ -1621,6 +2325,9 @@
 
     const delay = (ms) => new Promise(r => setTimeout(r, ms));
 
+    // =========================
+    // 게임 루프 업데이트
+    // =========================
     function stepProjectiles() {
       for (let i = state.projectiles.length - 1; i >= 0; i--) {
         const p = state.projectiles[i];
@@ -1642,28 +2349,84 @@
           const e = state.enemies[j];
           const d = Math.hypot(p.x - (e.x + 17), p.y - (e.y + 17));
           if (d < 30) {
-            e.hp -= p.damage;
+            let damage = p.damage;
+            
+            // 치명타 체크
+            if (state.skills.criticalHit) {
+              const critChance = SKILLS.criticalHit.getValue(state.skills.criticalHit);
+              if (Math.random() * 100 < critChance) {
+                damage *= 2;
+                showDamage(e.x + 17, e.y, 'CRIT!', false);
+              }
+            }
+            
+            // 파괴자 융합 스킬
+            if (state.skills.destroyer) {
+              const critChance = FUSION_SKILLS.destroyer.getValue(state.skills.destroyer);
+              if (Math.random() * 100 < critChance) {
+                damage *= 3;
+                showDamage(e.x + 17, e.y, 'MEGA CRIT!', false);
+              }
+            }
+            
+            e.hp -= damage;
             e.hpFill.style.width = (e.hp / e.maxHp * 100) + '%';
-            showDamage(e.x + 17, e.y, p.damage);
-            p.element.remove(); state.projectiles.splice(i, 1);
+            showDamage(e.x + 17, e.y, Math.floor(damage));
+            
+            // 관통 체크
+            p.hitCount++;
+            if (p.hitCount > p.penetration) {
+              p.element.remove(); 
+              state.projectiles.splice(i, 1);
+            }
+            
             if (e.hp <= 0) {
-              state.combo++; resetComboTimer(); showCombo();
-              if (e.isBoss) state.bossKills++;
-              if (e.isElite) state.eliteKills++;
-              const color = e.isBoss ? '#d946ef' : e.isElite ? '#ffa500' : '#ff4d4d';
-              createParticles(e.x + 17, e.y + 17, color);
-              e.element.remove(); state.enemies.splice(j, 1);
-              state.kills++;
-              const scoreAdd = (e.isBoss ? 100 : e.isElite ? 50 : 10) * Math.max(1, state.combo);
-              state.score += scoreAdd;
-              gainExp(e.isBoss ? 50 : e.isElite ? 30 : 10);
-              if (Math.random() < 0.3) createItem(e.x, e.y, 'heal');
-              checkAchievements();
+              handleEnemyKill(e, j);
             }
             break;
           }
         }
       }
+    }
+
+    function handleEnemyKill(e, index) {
+      state.combo++; 
+      resetComboTimer(); 
+      showCombo();
+      
+      if (e.isBoss) state.bossKills++;
+      if (e.isElite) state.eliteKills++;
+      
+      const color = e.isBoss ? '#d946ef' : e.isElite ? '#ffa500' : '#ff4d4d';
+      createParticles(e.x + 17, e.y + 17, color);
+      
+      e.element.remove(); 
+      state.enemies.splice(index, 1);
+      state.kills++;
+      
+      const scoreAdd = (e.isBoss ? 100 : e.isElite ? 50 : 10) * Math.max(1, state.combo);
+      state.score += scoreAdd;
+      gainExp(e.isBoss ? 50 : e.isElite ? 30 : 10);
+      
+      // 흡혈 스킬
+      if (state.skills.lifeSteal) {
+        const healAmount = SKILLS.lifeSteal.getValue(state.skills.lifeSteal);
+        state.hp = Math.min(state.maxHp, state.hp + healAmount);
+        showDamage(state.playerX, state.playerY, healAmount, true);
+      }
+      
+      // 광전사 융합 스킬
+      if (state.skills.berserker) {
+        const healAmount = FUSION_SKILLS.berserker.getValue(state.skills.berserker) * 0.5;
+        state.hp = Math.min(state.maxHp, state.hp + healAmount);
+        showDamage(state.playerX, state.playerY, Math.floor(healAmount), true);
+      }
+      
+      if (Math.random() < 0.3) createItem(e.x, e.y, 'heal');
+      if (Math.random() < 0.15) createWeaponDrop(e.x, e.y);
+      
+      checkAchievements();
+      updateUI();
     }
 
     function stepEnemies() {
@@ -1681,11 +2444,9 @@
         const testX = e.x + moveX;
         const testY = e.y + moveY;
 
-        // 벽 충돌 시 우회 로직
         if (checkWallCollision(testX, testY, size)) {
           const avoid = getAvoidanceVector(testX, testY, size);
 
-          // 벽을 피하는 방향으로 이동 시도
           const altMoveX1 = moveY * 0.7 + avoid.x * e.speed * 0.5;
           const altMoveY1 = -moveX * 0.7 + avoid.y * e.speed * 0.5;
 
@@ -1693,7 +2454,6 @@
             moveX = altMoveX1;
             moveY = altMoveY1;
           } else {
-            // 반대 방향으로 우회 시도
             const altMoveX2 = -moveY * 0.7 + avoid.x * e.speed * 0.5;
             const altMoveY2 = moveX * 0.7 + avoid.y * e.speed * 0.5;
 
@@ -1701,7 +2461,6 @@
               moveX = altMoveX2;
               moveY = altMoveY2;
             } else {
-              // 벽에서 밀려나기
               moveX = avoid.x * e.speed;
               moveY = avoid.y * e.speed;
             }
@@ -1712,15 +2471,26 @@
         e.y += moveY;
 
         e.element.style.left = e.x + 'px'; e.element.style.top = e.y + 'px';
+        
         if (d < 40 && now - e.lastDamageTime > 500) {
-          const dmg = e.isBoss ? 10 : e.isElite ? 8 : 5;
-          state.hp -= dmg;
-          e.lastDamageTime = now;
-          showDamage(state.playerX, state.playerY, dmg);
-          playSfx('sfxDamage');
-          playerEl.classList.add('flash');
-          setTimeout(() => playerEl.classList.remove('flash'), 600);
-          updateUI();
+          if (!state.invincible) {
+            const dmg = e.isBoss ? 10 : e.isElite ? 8 : 5;
+            state.hp -= dmg;
+            e.lastDamageTime = now;
+            showDamage(state.playerX, state.playerY, dmg);
+            playSfx('sfxDamage');
+            playerEl.classList.add('flash');
+            setTimeout(() => playerEl.classList.remove('flash'), 600);
+            
+            // 요새 스킬 - 피격 시 무적
+            if (state.skills.fortress && !state.invincible) {
+              state.invincible = true;
+              state.invincibleTimer = 3;
+              showDamage(state.playerX, state.playerY - 40, 'INVINCIBLE!', true);
+            }
+            
+            updateUI();
+          }
         }
       }
     }
@@ -1737,6 +2507,7 @@
           updateUI(); playSfx('sfxPick');
         }
       }
+      
       for (let i = state.powerups.length - 1; i >= 0; i--) {
         const it = state.powerups[i];
         const d = Math.hypot(state.playerX - it.x, state.playerY - it.y);
@@ -1746,6 +2517,19 @@
           createParticles(it.x, it.y, '#06ffa5');
           it.element.remove(); state.powerups.splice(i, 1);
           updateUI(); playSfx('sfxPick');
+        }
+      }
+      
+      for (let i = state.weaponDrops.length - 1; i >= 0; i--) {
+        const it = state.weaponDrops[i];
+        const d = Math.hypot(state.playerX - it.x, state.playerY - it.y);
+        if (d < 40) {
+          pickupWeapon(it.weaponId);
+          const weapon = WEAPONS[it.weaponId];
+          showDamage(state.playerX, state.playerY, `${weapon.icon} ${weapon.name}!`, true);
+          createParticles(it.x, it.y, weapon.color);
+          it.element.remove(); 
+          state.weaponDrops.splice(i, 1);
         }
       }
     }
@@ -1764,6 +2548,25 @@
         state.timeAcc -= 1;
         state.surviveSec += 1;
         state.score += state.scorePerSecBase * Math.pow(1.05, state.stage);
+        
+        // 조화 스킬 - 체력 재생
+        if (state.skills.harmony) {
+          state.regenTimer += 1;
+          if (state.regenTimer >= 1) {
+            const regenAmount = SKILLS.harmony.getValue(state.skills.harmony);
+            state.hp = Math.min(state.maxHp, state.hp + regenAmount);
+            state.regenTimer = 0;
+          }
+        }
+        
+        // 무적 타이머
+        if (state.invincible) {
+          state.invincibleTimer -= 1;
+          if (state.invincibleTimer <= 0) {
+            state.invincible = false;
+            showDamage(state.playerX, state.playerY - 40, 'SHIELD END', false);
+          }
+        }
       }
       if (state.surviveSec !== prev) updateUI();
     }
@@ -1774,7 +2577,7 @@
       const dt = Math.min(0.05, (ts - lastTs) / 1000); lastTs = ts;
 
       let mx = 0, my = 0;
-      const sp = state.speed;
+      const sp = calculateTotalSpeed();
       if (state.keys['ArrowLeft']) mx -= sp;
       if (state.keys['ArrowRight']) mx += sp;
       if (state.keys['ArrowUp']) my -= sp;
@@ -1788,17 +2591,13 @@
 
         const ch = getChar();
 
-        // 벽 충돌 시 슬라이딩 처리
         if (checkWallCollision(newX, newY, ch.size)) {
-          // X축만 이동 시도
           if (!checkWallCollision(newX, state.playerY, ch.size)) {
             newY = state.playerY;
           }
-          // Y축만 이동 시도
           else if (!checkWallCollision(state.playerX, newY, ch.size)) {
             newX = state.playerX;
           }
-          // 둘 다 안되면 이동 안함
           else {
             newX = state.playerX;
             newY = state.playerY;
@@ -1825,6 +2624,9 @@
       requestAnimationFrame(gameLoop);
     }
 
+    // =========================
+    // 입력 처리
+    // =========================
     document.addEventListener('keydown', e => {
       state.keys[e.key] = true;
       if (state.screen === 'playing') {
@@ -1839,6 +2641,9 @@
     });
     document.addEventListener('keyup', e => { state.keys[e.key] = false; });
 
+    // =========================
+    // 화면 전환
+    // =========================
     function openIntro() {
       state.screen = 'intro';
       showModal('intro');
@@ -1846,7 +2651,6 @@
 
     function openMenu() {
       state.screen = 'menu'; state.running = false;
-      stopBGM();
       pauseOverlay.style.display = 'none';
       showModal('menu');
       updateCharacterSelect();
@@ -1858,7 +2662,6 @@
       resetRunState();
       hideAllModals();
       pauseOverlay.style.display = 'none';
-      playBGM();
       updateUI();
       requestAnimationFrame(gameLoop);
     }
@@ -1914,14 +2717,23 @@
       state.stage = 1; state.kills = 0; state.bossKills = 0; state.eliteKills = 0;
       state.score = 0; state.surviveSec = 0; state.timeAcc = 0;
       state.combo = 0; clearTimeout(state.comboTimer); const c = document.getElementById('combo'); if (c) c.remove();
+      
+      state.weapons = {};
+      state.skills = {};
+      state.pendingSkillChoice = false;
+      state.invincible = false;
+      state.invincibleTimer = 0;
+      state.regenTimer = 0;
 
-      for (const arr of [state.enemies, state.items, state.powerups, state.projectiles, state.walls, state.traps]) {
+      for (const arr of [state.enemies, state.items, state.powerups, state.projectiles, state.walls, state.traps, state.weaponDrops]) {
         arr.forEach(o => o.element?.remove()); arr.length = 0;
       }
 
-      // 플레이어 위치 설정 후 맵 생성
       clampPlayer();
       generateMapElements();
+      updateWeaponUI();
+      updateSkillsUI();
+      updateShieldVisual();
 
       for (let i = 0; i < 3; i++) createEnemy('normal');
       lastTs = performance.now();
@@ -1962,6 +2774,9 @@
       });
     }
 
+    // =========================
+    // 상점 및 업그레이드
+    // =========================
     function renderShop() {
       LISTS.shop.innerHTML = '';
       Object.entries(CHARACTERS).forEach(([id, cfg]) => {
@@ -2098,6 +2913,9 @@
 
     function scoreToGold(score) { return Math.floor(score * 0.10); }
 
+    // =========================
+    // 게임 오버
+    // =========================
     function gameOver() {
       if (state.screen === 'gameover') return;
       state.screen = 'gameover'; state.running = false;
@@ -2165,6 +2983,9 @@
       });
     }
 
+    // =========================
+    // 버튼 이벤트
+    // =========================
     BTN.introStart.onclick = () => { playSfx('sfxBtn'); openMenu(); };
     BTN.introTutorial.onclick = () => { playSfx('sfxBtn'); showModal('tutorial'); state.screen = 'tutorial'; };
     BTN.tutorialBack.onclick = () => { playSfx('sfxBtn'); openIntro(); };
@@ -2191,6 +3012,9 @@
     INPUTS.bgmVol.oninput = () => { setBgmVolume(Number(INPUTS.bgmVol.value)); saveSettings(); };
     INPUTS.sfxVol.oninput = () => { setSfxVolume(Number(INPUTS.sfxVol.value)); saveSettings(); };
 
+    // =========================
+    // 초기화
+    // =========================
     function init() {
       initAudio();
       loadSave();
