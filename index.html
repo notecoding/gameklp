@@ -101,6 +101,7 @@
       gap: 15px;
       justify-content: center;
       align-items: flex-start;
+      margin: 0 auto;
     }
 
     #game {
@@ -221,7 +222,8 @@
       position: absolute;
       border-radius: 50%;
       box-shadow: 0 0 20px rgba(255, 215, 0, .9);
-      animation: itemSpin 2s linear infinite
+      animation: itemSpin 2s linear infinite;
+      z-index: 15;
     }
 
     @keyframes itemSpin {
@@ -250,6 +252,7 @@
       font-size: 20px;
       border: 2px solid rgba(255, 255, 255, 0.5);
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      z-index: 15;
     }
 
     @keyframes weaponFloat {
@@ -961,6 +964,9 @@
 </head>
 
 <body>
+  <audio id="bgmAudio" loop>
+    <source src="bgm.wav" type="audio/wav">
+  </audio>
   <div id="gameContainer">
     <h1>⚔️ 다크 로그라이크 ⚔️</h1>
 
@@ -1464,6 +1470,12 @@
       try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       } catch (e) { console.warn('Web Audio API not supported'); }
+      
+      // BGM 오디오 생성
+      bgmAudio = new Audio();
+      bgmAudio.src = './bgm.wav';
+      bgmAudio.loop = true;
+      bgmAudio.volume = 0.9;
     }
 
     function setBgmVolume(v) {
@@ -1472,6 +1484,35 @@
     }
 
     function setSfxVolume(v) { state.audio.sfxVol = v; }
+
+    function playBgm() {
+      if (bgmAudio) {
+        bgmAudio.currentTime = 0;
+        bgmAudio.volume = state.audio.bgmVol;
+        bgmAudio.play().catch(e => console.log('BGM play failed:', e));
+      }
+    }
+
+    function stopBgm() {
+      if (bgmAudio) {
+        bgmAudio.pause();
+        bgmAudio.currentTime = 0;
+      }
+    }
+
+    function pauseBgm() {
+      if (bgmAudio) {
+        bgmAudio.pause();
+      }
+    }
+
+    function resumeBgm() {
+      if (bgmAudio) {
+        bgmAudio.volume = state.audio.bgmVol;
+        bgmAudio.play().catch(e => console.log('BGM resume failed:', e));
+      }
+    }
+
 
     function playSfx(type) {
       if (!audioCtx || state.audio.sfxVol <= 0) return;
@@ -1571,6 +1612,7 @@
         }
       } catch (e) { console.warn('SFX failed:', e); }
     }
+    
 
     // =========================
     // 저장/로드 시스템
@@ -2663,12 +2705,14 @@
       hideAllModals();
       pauseOverlay.style.display = 'none';
       updateUI();
+      playBgm(); // BGM 재생 시작
       requestAnimationFrame(gameLoop);
     }
 
     function pauseGame() {
       if (state.screen !== 'playing') return;
       state.screen = 'paused'; state.running = false;
+      pauseBgm(); // BGM 일시정지
       pauseOverlay.style.display = 'flex';
       showModal('settings');
       BTN.resumeGame.style.display = 'inline-block';
@@ -2677,6 +2721,7 @@
     function resumeGame() {
       if (state.screen !== 'paused') return;
       state.screen = 'playing'; state.running = true;
+      resumeBgm(); // BGM 재개
       hideAllModals();
       pauseOverlay.style.display = 'none';
       BTN.resumeGame.style.display = 'none';
@@ -2919,6 +2964,7 @@
     function gameOver() {
       if (state.screen === 'gameover') return;
       state.screen = 'gameover'; state.running = false;
+      stopBgm(); // BGM 정지
       playSfx('sfxLose');
 
       checkAchievements();
