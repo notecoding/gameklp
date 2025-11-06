@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>원본 로그라이크</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: white;
+            font-family: Arial;
+        }
+        
+        #ui {
+            margin-bottom: 10px;
+        }
+        
+        #hp {
+            font-size: 16px;
+            color: red;
+        }
+        
+        #stage {
+            font-size: 16px;
+        }
+        
+        #game {
+            width: 600px;
+            height: 400px;
+            background: lightgray;
+            position: relative;
+            border: 2px solid black;
+        }
+        
+        #player {
+            width: 30px;
+            height: 30px;
+            background: blue;
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+        }
+        
+        .enemy {
+            width: 30px;
+            height: 30px;
+            background: red;
+            position: absolute;
+        }
+        
+        .item {
+            width: 20px;
+            height: 20px;
+            background: gold;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div id="hp">HP: 100</div>
+        <div id="stage">Stage: 1</div>
+    </div>
+    <div id="game">
+        <div id="player"></div>
+    </div>
+    <div style="margin-top: 10px;">화살표 키: 이동 | Space: 공격</div>
+    
+    <script>
+        let playerX = 50;
+        let playerY = 350;
+        let hp = 100;
+        let stage = 1;
+        let enemies = [];
+        let items = [];
+        
+        const player = document.getElementById('player');
+        const game = document.getElementById('game');
+        
+        function spawnEnemy() {
+            const enemy = document.createElement('div');
+            enemy.className = 'enemy';
+            const x = Math.random() * 550;
+            const y = Math.random() * 350;
+            enemy.style.left = x + 'px';
+            enemy.style.top = y + 'px';
+            game.appendChild(enemy);
+            enemies.push({element: enemy, x: x, y: y, hp: 30});
+        }
+        
+        function spawnItem() {
+            const item = document.createElement('div');
+            item.className = 'item';
+            const x = Math.random() * 570;
+            const y = Math.random() * 370;
+            item.style.left = x + 'px';
+            item.style.top = y + 'px';
+            game.appendChild(item);
+            items.push({element: item, x: x, y: y});
+        }
+        
+        function attack() {
+            enemies.forEach((enemy, index) => {
+                const dist = Math.sqrt(
+                    Math.pow(playerX - enemy.x, 2) + 
+                    Math.pow(playerY - enemy.y, 2)
+                );
+                
+                if (dist < 80) {
+                    enemy.hp -= 10;
+                    if (enemy.hp <= 0) {
+                        enemy.element.remove();
+                        enemies.splice(index, 1);
+                        
+                        if (Math.random() < 0.3) {
+                            spawnItem();
+                        }
+                    }
+                }
+            });
+        }
+        
+        function checkCollision() {
+            items.forEach((item, index) => {
+                const dist = Math.sqrt(
+                    Math.pow(playerX - item.x, 2) + 
+                    Math.pow(playerY - item.y, 2)
+                );
+                
+                if (dist < 30) {
+                    hp = Math.min(100, hp + 20);
+                    item.element.remove();
+                    items.splice(index, 1);
+                    updateUI();
+                }
+            });
+            
+            enemies.forEach(enemy => {
+                const dist = Math.sqrt(
+                    Math.pow(playerX - enemy.x, 2) + 
+                    Math.pow(playerY - enemy.y, 2)
+                );
+                
+                if (dist < 35) {
+                    hp -= 1;
+                    updateUI();
+                }
+            });
+        }
+        
+        function updateUI() {
+            document.getElementById('hp').textContent = 'HP: ' + hp;
+            document.getElementById('stage').textContent = 'Stage: ' + stage;
+            
+            if (hp <= 0) {
+                alert('Game Over!');
+                location.reload();
+            }
+        }
+        
+        function nextStage() {
+            if (enemies.length === 0) {
+                stage++;
+                updateUI();
+                for (let i = 0; i < stage + 1; i++) {
+                    spawnEnemy();
+                }
+            }
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                playerX = Math.max(0, playerX - 10);
+            } else if (e.key === 'ArrowRight') {
+                playerX = Math.min(570, playerX + 10);
+            } else if (e.key === 'ArrowUp') {
+                playerY = Math.max(0, playerY - 10);
+            } else if (e.key === 'ArrowDown') {
+                playerY = Math.min(370, playerY + 10);
+            } else if (e.key === ' ') {
+                attack();
+                e.preventDefault();
+            }
+            
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+            checkCollision();
+        });
+        
+        setInterval(() => {
+            nextStage();
+        }, 100);
+        
+        for (let i = 0; i < 2; i++) {
+            spawnEnemy();
+        }
+    </script>
+</body>
+</html>
